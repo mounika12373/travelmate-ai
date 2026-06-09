@@ -16,8 +16,8 @@ def inject_global_css():
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
         /* Apply Font */
-        html, body, [class*="css"], .stMarkdown, p, h1, h2, h3, h4, h5, h6, li, span, button, input, select, textarea {
-            font-family: 'Outfit', sans-serif !important;
+        html, body, .stMarkdown, p, h1, h2, h3, h4, h5, h6, li, button, input, select, textarea {
+            font-family: 'Outfit', sans-serif;
         }
 
         /* Custom Card Styling */
@@ -150,8 +150,9 @@ def inject_global_css():
             padding-bottom: 3rem !important;
         }
         
+        /* Custom Sidebar navigation spacing */
         div[data-testid="stSidebarNav"] {
-            display: none !important;
+            margin-top: 10px;
         }
         </style>
     """)
