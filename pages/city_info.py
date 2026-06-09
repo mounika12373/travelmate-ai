@@ -67,98 +67,166 @@ tab_attract, tab_food, tab_hotel, tab_transit = st.tabs([
 
 # 1. Attractions & Shopping
 with tab_attract:
-    col_attr, col_shop = st.columns([2, 1])
-    
-    with col_attr:
-        st.markdown("### 🎡 Major Tourist Attractions")
-        try:
-            places = json.loads(city["tourist_places"])
-            for place in places:
-                # Render using custom styling card helper
+    try:
+        places = json.loads(city["tourist_places"])
+        st.markdown("### 🎡 Top Attractions to Visit")
+        
+        # Grid of columns for attractions (2-column layout for spacious look)
+        cols = st.columns(2)
+        for idx, place in enumerate(places):
+            col = cols[idx % 2]
+            with col:
                 badge_text = f"⭐ {place.get('rating', '4.5')}"
                 if 'time' in place:
-                    badge_text += f" | {place['time']}"
+                    badge_text += f" | ⏰ {place['time']}"
                 
                 render_card(
-                    title=place["name"],
+                    title=f"📍 {place['name']}",
                     content=place["desc"],
                     badges=badge_text
                 )
-        except Exception as e:
-            st.error("Error loading tourist places.")
-            st.write(city["tourist_places"])
+    except Exception as e:
+        st.error("Error loading tourist places.")
+        st.write(city["tourist_places"])
             
-    with col_shop:
+    st.markdown("---")
+    
+    try:
+        shops = json.loads(city["shopping_areas"])
         st.markdown("### 🛍️ Famous Shopping Spots")
-        try:
-            shops = json.loads(city["shopping_areas"])
-            for shop in shops:
-                render_html(f"""
-                    <div style="background-color: var(--secondary-background-color); border: 1px solid rgba(128,128,128,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
-                        <h5 style="margin: 0 0 5px 0; font-weight:600; font-size:1.05rem;">🛍️ {shop['name']}</h5>
-                        <p style="margin: 0; font-size: 0.85rem; color: gray;">{shop['desc']}</p>
-                    </div>
-                """)
-        except Exception as e:
-            st.error("Error loading shopping areas.")
-            st.write(city["shopping_areas"])
+        
+        # Grid of columns for shopping
+        shop_cols = st.columns(2)
+        for idx, shop in enumerate(shops):
+            col = shop_cols[idx % 2]
+            with col:
+                render_card(
+                    title=f"🛍️ {shop['name']}",
+                    content=shop['desc'],
+                    badges="Shopping Area"
+                )
+    except Exception as e:
+        st.error("Error loading shopping areas.")
+        st.write(city["shopping_areas"])
 
 # 2. Local Food & Dining
 with tab_food:
-    st.markdown("### 🍲 Must-Try Famous Dishes")
     try:
         foods = json.loads(city["food_info"])
-        # Grid of foods
-        f_cols = st.columns(2)
-        for i, food in enumerate(foods):
-            col_idx = i % 2
-            with f_cols[col_idx]:
-                render_card(
-                    title=food["name"],
-                    content=food["desc"],
-                    badges=[food["type"]]
-                )
+        st.markdown("### 🍲 Must-Try Famous Dishes")
+        
+        # Categorize foods dynamically to avoid clutter
+        veg_foods = []
+        non_veg_foods = []
+        other_foods = []
+        
+        for food in foods:
+            ftype = food.get("type", "").lower()
+            if "non-veg" in ftype:
+                non_veg_foods.append(food)
+            elif "veg" in ftype:
+                veg_foods.append(food)
+            else:
+                other_foods.append(food)
+        
+        # Display side-by-side if both categories exist
+        if veg_foods and non_veg_foods:
+            col_veg, col_nonveg = st.columns(2)
+            
+            with col_veg:
+                st.markdown("#### 🟢 Vegetarian Delights")
+                for food in veg_foods:
+                    render_card(
+                        title=f"🍲 {food['name']}",
+                        content=food["desc"],
+                        badges=["Vegetarian"]
+                    )
+            
+            with col_nonveg:
+                st.markdown("#### 🔴 Non-Vegetarian Specials")
+                for food in non_veg_foods:
+                    render_card(
+                        title=f"🍗 {food['name']}",
+                        content=food["desc"],
+                        badges=["Non-Vegetarian"]
+                    )
+                    
+            if other_foods:
+                st.markdown("#### 🌟 Local Favorites")
+                other_cols = st.columns(2)
+                for idx, food in enumerate(other_foods):
+                    col = other_cols[idx % 2]
+                    with col:
+                        render_card(
+                            title=f"🍽️ {food['name']}",
+                            content=food["desc"],
+                            badges=[food.get("type", "Local Spec")]
+                        )
+        else:
+            # Fallback to standard clean 2-column grid if not mixed
+            f_cols = st.columns(2)
+            for i, food in enumerate(foods):
+                col_idx = i % 2
+                with f_cols[col_idx]:
+                    ftype = food.get("type", "Local Spec")
+                    emoji = "🍲"
+                    if "non-veg" in ftype.lower():
+                        emoji = "🍗"
+                    elif "veg" in ftype.lower():
+                        emoji = "🟢"
+                    render_card(
+                        title=f"{emoji} {food['name']}",
+                        content=food["desc"],
+                        badges=[ftype]
+                    )
     except Exception as e:
         st.error("Error loading food details.")
         st.write(city["food_info"])
 
 # 3. Recommended Stays (Hotels)
 with tab_hotel:
-    st.markdown("### 🏨 Recommended Accommodation options")
+    st.markdown("### 🏨 Recommended Accommodations")
     try:
         hotels = json.loads(city["hotel_info"])
         
-        col_lux, col_mid, col_bud = st.columns(3)
+        # Grid layout sorted from budget to luxury
+        col_bud, col_mid, col_lux = st.columns(3)
         
-        with col_lux:
-            st.markdown("##### 💎 Luxury (High-End)")
-            lux = hotels.get("luxury")
-            if lux:
-                render_card(
-                    title=lux["name"],
-                    content=lux["desc"],
-                    price_badge=lux.get("price", "Luxury")
-                )
-                
-        with col_mid:
-            st.markdown("##### 🏢 Mid-Range (Moderate)")
-            mid = hotels.get("mid_range")
-            if mid:
-                render_card(
-                    title=mid["name"],
-                    content=mid["desc"],
-                    price_badge=mid.get("price", "Mid-Range")
-                )
-                
         with col_bud:
-            st.markdown("##### 🪙 Budget (Value)")
+            st.markdown("#### 🪙 Budget Friendly")
             bud = hotels.get("budget")
             if bud:
                 render_card(
-                    title=bud["name"],
+                    title=f"🏨 {bud['name']}",
                     content=bud["desc"],
                     price_badge=bud.get("price", "Budget")
                 )
+            else:
+                st.caption("No budget accommodation listed.")
+                
+        with col_mid:
+            st.markdown("#### 🏢 Mid-Range Comfort")
+            mid = hotels.get("mid_range")
+            if mid:
+                render_card(
+                    title=f"🏨 {mid['name']}",
+                    content=mid["desc"],
+                    price_badge=mid.get("price", "Mid-Range")
+                )
+            else:
+                st.caption("No mid-range accommodation listed.")
+                
+        with col_lux:
+            st.markdown("#### 💎 Luxury Stay")
+            lux = hotels.get("luxury")
+            if lux:
+                render_card(
+                    title=f"🏰 {lux['name']}",
+                    content=lux["desc"],
+                    price_badge=lux.get("price", "Luxury")
+                )
+            else:
+                st.caption("No luxury accommodation listed.")
     except Exception as e:
         st.error("Error loading accommodation details.")
         st.write(city["hotel_info"])
