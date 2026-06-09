@@ -3,6 +3,10 @@ import streamlit as st
 from utils.database import get_all_countries, get_cities_by_country, get_city_details
 from utils.styles import render_hero, render_card, render_html
 
+def make_maps_link(item_name, city_name):
+    query = f"{item_name} {city_name}".replace(" ", "+")
+    return f"<a href='https://www.google.com/maps/search/?api=1&query={query}' target='_blank' style='text-decoration:none; color:var(--primary-color); font-weight:600; font-size:0.88rem; display:inline-block; margin-top:5px;'>🗺️ Location & Directions ↗</a>"
+
 # Sidebar selectors for quick context changing
 countries = get_all_countries()
 if not countries:
@@ -83,7 +87,8 @@ with tab_attract:
                 render_card(
                     title=f"📍 {place['name']}",
                     content=place["desc"],
-                    badges=badge_text
+                    badges=badge_text,
+                    extra_html=make_maps_link(place['name'], city['city_name'])
                 )
     except Exception as e:
         st.error("Error loading tourist places.")
@@ -103,7 +108,8 @@ with tab_attract:
                 render_card(
                     title=f"🛍️ {shop['name']}",
                     content=shop['desc'],
-                    badges="Shopping Area"
+                    badges="Shopping Area",
+                    extra_html=make_maps_link(shop['name'], city['city_name'])
                 )
     except Exception as e:
         st.error("Error loading shopping areas.")
@@ -199,7 +205,8 @@ with tab_hotel:
                 render_card(
                     title=f"🏨 {bud['name']}",
                     content=bud["desc"],
-                    price_badge=bud.get("price", "Budget")
+                    price_badge=bud.get("price", "Budget"),
+                    extra_html=make_maps_link(bud['name'], city['city_name'])
                 )
             else:
                 st.caption("No budget accommodation listed.")
@@ -211,7 +218,8 @@ with tab_hotel:
                 render_card(
                     title=f"🏨 {mid['name']}",
                     content=mid["desc"],
-                    price_badge=mid.get("price", "Mid-Range")
+                    price_badge=mid.get("price", "Mid-Range"),
+                    extra_html=make_maps_link(mid['name'], city['city_name'])
                 )
             else:
                 st.caption("No mid-range accommodation listed.")
@@ -223,7 +231,8 @@ with tab_hotel:
                 render_card(
                     title=f"🏰 {lux['name']}",
                     content=lux["desc"],
-                    price_badge=lux.get("price", "Luxury")
+                    price_badge=lux.get("price", "Luxury"),
+                    extra_html=make_maps_link(lux['name'], city['city_name'])
                 )
             else:
                 st.caption("No luxury accommodation listed.")
