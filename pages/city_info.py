@@ -233,15 +233,23 @@ with tab_hotel:
 
 # 4. Transit & Airport Guide
 with tab_transit:
+    import re
+    def to_bullets(text):
+        if not text:
+            return ""
+        # Split by period followed by whitespace and a capital letter
+        sentences = re.split(r'\.\s+(?=[A-Z])', text.strip())
+        return "\n".join(["- " + s.rstrip('.') + "." for s in sentences if s.strip()])
+
     col_airport, col_metro = st.columns(2)
     
     with col_airport:
         st.markdown("### ✈️ Airport Access Details")
-        st.info(city["airport_details"])
+        st.info(to_bullets(city["airport_details"]))
         
     with col_metro:
         st.markdown("### 🚌 Local Public Transportation")
-        st.success(city["transport_info"])
+        st.success(to_bullets(city["transport_info"]))
         
     st.subheader("🛡️ Safety Recommendations for " + city["city_name"])
-    st.warning(city["safety_recommendations"])
+    st.warning(to_bullets(city["safety_recommendations"]))
