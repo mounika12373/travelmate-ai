@@ -156,12 +156,55 @@ def inject_global_css():
         </style>
     """)
 
-def render_hero(title, subtitle):
-    """Renders a beautiful hero header."""
+import base64
+
+def get_image_base64(image_path):
+    """Converts a local image file to a base64 encoded string."""
+    try:
+        with open(image_path, "rb") as image_file:
+            encoded = base64.b64encode(image_file.read()).decode()
+            return f"data:image/png;base64,{encoded}"
+    except Exception as e:
+        return ""
+
+def render_hero(title, subtitle, image_path=None):
+    """Renders a beautiful hero header, optionally with a background image."""
+    style_attr = ""
+    if image_path:
+        base64_img = get_image_base64(image_path)
+        if base64_img:
+            style_attr = f"style=\"background-image: linear-gradient(135deg, rgba(13, 21, 39, 0.85), rgba(26, 54, 93, 0.65)), url('{base64_img}'); background-size: cover; background-position: center;\""
+            
     render_html(f"""
-        <div class="hero-banner">
+        <div class="hero-banner" {style_attr}>
             <h1>{title}</h1>
             <p>{subtitle}</p>
+        </div>
+    """)
+
+def render_image_card(title, content, image_path, badges=None, height="260px"):
+    """Helper to render a styled HTML card with a background image and text overlay."""
+    base64_img = get_image_base64(image_path)
+    
+    badge_html = ""
+    if badges:
+        if isinstance(badges, list):
+            for b in badges:
+                badge_html += f'<span class="tag-badge" style="background: rgba(0,0,0,0.6); color: white; border: 1px solid rgba(255,255,255,0.2);">{b}</span>'
+        else:
+            badge_html = f'<span class="rating-badge">{badges}</span>'
+
+    bg_style = f"background-image: linear-gradient(180deg, rgba(0,0,0,0.1), rgba(11, 19, 43, 0.9)), url('{base64_img}');" if base64_img else "background: var(--secondary-background-color);"
+    
+    render_html(f"""
+        <div class="travel-card" style="{bg_style} background-size: cover; background-position: center; min-height: {height}; display: flex; flex-direction: column; justify-content: flex-end; color: white !important;">
+            <div style="position: absolute; top: 15px; right: 15px; display: flex; gap: 5px;">
+                {badge_html}
+            </div>
+            <div style="text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
+                <h3 style="margin-top: 0; margin-bottom: 5px; font-weight: 700; font-size: 1.25rem; color: white !important;">{title}</h3>
+                <p style="margin-bottom: 0; font-size: 0.88rem; line-height: 1.4; color: rgba(255,255,255,0.9) !important;">{content}</p>
+            </div>
         </div>
     """)
 

@@ -1,10 +1,14 @@
 import streamlit as st
 from utils.database import get_all_countries, get_cities_by_country, search_locations
-from utils.styles import render_hero, render_card, render_html
+from utils.styles import render_hero, render_card, render_html, render_image_card
 
 
 # Page Title inside sidebar context (optional, since router does it, but we can set content)
-render_hero("TravelMate AI", "Discover essential local laws, cultural etiquette, transit guides, top foods, and safety advice before you arrive.")
+render_hero(
+    "TravelMate AI", 
+    "Discover essential local laws, cultural etiquette, transit guides, top foods, and safety advice before you arrive.",
+    image_path="assets/travelmate_banner.png"
+)
 
 # 1. Quick Search Section
 st.subheader("🔍 Quick Search")
@@ -124,13 +128,12 @@ st.subheader("⭐ Featured Destinations")
 col_trend1, col_trend2, col_trend3 = st.columns(3)
 
 with col_trend1:
-    render_html("""
-        <div class="travel-card" style="min-height: 250px;">
-            <div class="rating-badge">Most Popular</div>
-            <h4 style="margin-top: 5px;">Shibuya, Tokyo</h4>
-            <p style="font-size:0.9rem; color:gray;">Experience the high-tech neon lights, historical shrines, and Michelin-starred culinary scene of Japan's heart.</p>
-        </div>
-    """)
+    render_image_card(
+        title="Shibuya, Tokyo",
+        content="Experience the high-tech neon lights, historical shrines, and Michelin-starred culinary scene of Japan's heart.",
+        image_path="assets/tokyo_city.png",
+        badges=["4.9 ⭐", "Most Popular"]
+    )
     if st.button("Explore Tokyo", key="trend_tokyo", use_container_width=True):
         tokyo_city = next((ct for c in get_cities_by_country(2) if ct["city_name"].lower() == "tokyo"), None)
         if tokyo_city:
@@ -139,13 +142,12 @@ with col_trend1:
             st.switch_page("pages/city_info.py")
 
 with col_trend2:
-    render_html("""
-        <div class="travel-card" style="min-height: 250px;">
-            <div class="rating-badge">Cultural Choice</div>
-            <h4 style="margin-top: 5px;">Old City, Hyderabad</h4>
-            <p style="font-size:0.9rem; color:gray;">Savor world-famous Biryani, stand before the historic Charminar, and buy pearls in Nizam's heritage bazaar.</p>
-        </div>
-    """)
+    render_image_card(
+        title="Old City, Hyderabad",
+        content="Savor world-famous Biryani, stand before the historic Charminar, and buy pearls in Nizam's heritage bazaar.",
+        image_path="assets/hyderabad_city.png",
+        badges=["4.7 ⭐", "Cultural Choice"]
+    )
     if st.button("Explore Hyderabad", key="trend_hyd", use_container_width=True):
         hyd_city = next((ct for ct in get_cities_by_country(1) if ct["city_name"].lower() == "hyderabad"), None)
         if hyd_city:
@@ -154,13 +156,12 @@ with col_trend2:
             st.switch_page("pages/city_info.py")
 
 with col_trend3:
-    render_html("""
-        <div class="travel-card" style="min-height: 250px;">
-            <div class="rating-badge">Safest Destination</div>
-            <h4 style="margin-top: 5px;">Garden City, Singapore</h4>
-            <p style="font-size:0.9rem; color:gray;">Walk through futuristic gardens, stand in awe of Marina Bay Sands, and discover local hawker food courts.</p>
-        </div>
-    """)
+    render_image_card(
+        title="Garden City, Singapore",
+        content="Walk through futuristic gardens, stand in awe of Marina Bay Sands, and discover local hawker food courts.",
+        image_path="assets/singapore_city.png",
+        badges=["4.8 ⭐", "Safest Destination"]
+    )
     if st.button("Explore Singapore", key="trend_sg", use_container_width=True):
         sg_city = next((ct for ct in get_cities_by_country(3) if ct["city_name"].lower() == "singapore city"), None)
         if sg_city:
