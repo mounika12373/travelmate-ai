@@ -14,9 +14,17 @@ Before you start, make sure you have the following installed:
 ## ⚙️ Step-by-Step Installation
 
 ### Step 1: Clone the Project
-If you haven't already, download the project codebase:
+If you haven't already, download the project codebase from GitHub or GitLab:
+
+**From GitHub:**
 ```bash
 git clone https://github.com/mounika12373/travelmate-ai.git
+cd "Travel Information and Guidance Platform"
+```
+
+**From GitLab:**
+```bash
+git clone https://code.swecha.org/sweety28/travel-information-and-guide.git
 cd "Travel Information and Guidance Platform"
 ```
 

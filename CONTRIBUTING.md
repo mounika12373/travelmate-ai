@@ -6,11 +6,19 @@ First off, thank you for considering contributing to **TravelMate AI**! Contribu
 
 ## 🛠️ Getting Started
 
-### 1. Fork and Clone the Repository
-Fork the repository on GitHub and clone your fork locally:
+### 1. Clone the Repository
+Clone the repository locally from GitHub or GitLab:
+
+**From GitHub:**
 ```bash
 git clone https://github.com/mounika12373/travelmate-ai.git
 cd travelmate-ai
+```
+
+**From GitLab:**
+```bash
+git clone https://code.swecha.org/sweety28/travel-information-and-guide.git
+cd travel-information-and-guide
 ```
 
 ### 2. Set Up a Virtual Environment
