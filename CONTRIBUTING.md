@@ -9,7 +9,7 @@ First off, thank you for considering contributing to **TravelMate AI**! Contribu
 ### 1. Fork and Clone the Repository
 Fork the repository on GitHub and clone your fork locally:
 ```bash
-git clone https://github.com/<your-username>/travelmate-ai.git
+git clone https://github.com/mounika12373/travelmate-ai.git
 cd travelmate-ai
 ```
 

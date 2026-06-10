@@ -16,7 +16,7 @@ Before you start, make sure you have the following installed:
 ### Step 1: Clone the Project
 If you haven't already, download the project codebase:
 ```bash
-git clone https://github.com/<your-username>/travelmate-ai.git
+git clone https://github.com/mounika12373/travelmate-ai.git
 cd "Travel Information and Guidance Platform"
 ```
 
