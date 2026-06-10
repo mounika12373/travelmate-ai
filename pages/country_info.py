@@ -1,7 +1,7 @@
 import streamlit as st
-from utils.database import get_all_countries, get_country_details, get_cities_by_country
-from utils.styles import render_hero, render_html
 
+from utils.database import get_all_countries, get_cities_by_country, get_country_details
+from utils.styles import render_hero, render_html
 
 # Sidebar Country Quick Selector
 countries = get_all_countries()
@@ -19,9 +19,9 @@ if st.session_state.selected_country_id:
 
 st.sidebar.subheader("Explore another country")
 selected_country_name = st.sidebar.selectbox(
-    "Select Country", 
-    country_names, 
-    index=current_c_index, 
+    "Select Country",
+    country_names,
+    index=current_c_index,
     key="country_info_select"
 )
 
@@ -75,15 +75,15 @@ st.warning(f"🚨 **Emergency Numbers:** {country['emergency_number']}")
 
 # 2. Main Content Tabs
 tab_visa, tab_rules, tab_safety = st.tabs([
-    "📑 Visa & Entry Requirements", 
-    "📜 Rules & Cultural Etiquette", 
+    "📑 Visa & Entry Requirements",
+    "📜 Rules & Cultural Etiquette",
     "🛡️ Safety & Travel Tips"
 ])
 
 with tab_visa:
     st.markdown("### 📑 Visa & Entry Requirements")
     st.info(country["visa_info"])
-    
+
     st.markdown("#### ✈️ Quick Pre-Departure Checklist")
     st.markdown(f"""
     - [ ] Check passport validity (should have at least 6 months validity from departure date).
@@ -94,7 +94,7 @@ with tab_visa:
 
 with tab_rules:
     col_rules, col_etiquette = st.columns(2)
-    
+
     with col_rules:
         st.markdown("### 📜 Important Rules & Regulations")
         # Split rules by newline or number to present nicely
@@ -103,7 +103,7 @@ with tab_rules:
             if rule.strip():
                 # Extract description if formatting is like "1. Name: desc"
                 render_html(f"<div style='background-color:rgba(239, 68, 68, 0.05); padding:10px; border-left:3px solid #EF4444; border-radius:4px; margin-bottom:10px;'>{rule}</div>")
-                
+
     with col_etiquette:
         st.markdown("### 🤝 Cultural Dos & Don'ts")
         etiquette_list = country["etiquette"].split("\n")
@@ -114,21 +114,21 @@ with tab_rules:
 with tab_safety:
     st.markdown("### 🛡️ Safety & Travel Tips")
     tips_list = country["safety_tips"].split("\n")
-    
+
     col_tips1, col_tips2 = st.columns(2)
-    
+
     with col_tips1:
         st.markdown("#### 🌟 Health & Safety Guidelines")
         for tip in tips_list[:2]:
             if tip.strip():
                 st.markdown(f"- {tip}")
-                
+
     with col_tips2:
         st.markdown("#### 🗺️ Local Travel Warnings")
         for tip in tips_list[2:]:
             if tip.strip():
                 st.markdown(f"- {tip}")
-                
+
 # List of available cities in this country as a quick jumping point
 st.divider()
 st.subheader(f"🏙️ Cities in {country['country_name']}")

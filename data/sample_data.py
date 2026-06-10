@@ -1,17 +1,19 @@
 import json
+
 from utils.database import get_connection
+
 
 def populate_database():
     """Populates the database with sample data for India, Japan, and Singapore."""
     conn = get_connection()
     cursor = conn.cursor()
-    
+
     # Clean old data to prevent foreign key issues or duplicates
     cursor.execute("PRAGMA foreign_keys = OFF;")
     cursor.execute("DELETE FROM cities;")
     cursor.execute("DELETE FROM countries;")
     cursor.execute("PRAGMA foreign_keys = ON;")
-    
+
     # -------------------------------------------------------------
     # 1. INDIA
     # -------------------------------------------------------------
@@ -27,7 +29,7 @@ def populate_database():
         "etiquette": "1. Greet locals with a polite 'Namaste' with folded hands.\n2. Remove your shoes before entering someone's home.\n3. Always use your right hand when eating, giving, or receiving items (the left hand is traditionally considered unclean).\n4. Seek permission before taking photos of people or religious ceremonies.",
         "safety_tips": "1. Drink only bottled or purified water. Avoid street ice.\n2. Use official prepaid taxi counters at airports or standard ride-hailing apps like Ola/Uber.\n3. Keep your bags secure in crowded tourist spots to prevent pickpocketing.\n4. Dress appropriately to respect local norms and avoid unwanted attention."
     }
-    
+
     cursor.execute("""
     INSERT INTO countries (
         country_name, capital, currency, language, timezone, emergency_number, visa_info, rules, etiquette, safety_tips
@@ -38,7 +40,7 @@ def populate_database():
         india_data["visa_info"], india_data["rules"], india_data["etiquette"], india_data["safety_tips"]
     ))
     india_id = cursor.lastrowid
-    
+
     india_cities = [
         # 1. Hyderabad
         {
@@ -547,14 +549,14 @@ def populate_database():
             "safety_recommendations": "Generally very safe. Negotiate prices for silk only in state-run government outlets."
         }
     ]
-    
+
     for city in india_cities:
         cursor.execute("""
         INSERT INTO cities (
             country_id, city_name, description, transport_info, food_info, tourist_places, hotel_info, shopping_areas, airport_details, safety_recommendations
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """, (
-            city["country_id"], city["city_name"], city["description"],
+            india_id, city["city_name"], city["description"],
             city["transport_info"], json.dumps(city["food_info"]), json.dumps(city["tourist_places"]),
             json.dumps(city["hotel_info"]), json.dumps(city["shopping_areas"]), city["airport_details"],
             city["safety_recommendations"]
@@ -575,7 +577,7 @@ def populate_database():
         "etiquette": "1. Bowing is the traditional greeting; a slight nod is sufficient for tourists.\n2. Take off shoes when entering homes, ryokans (traditional inns), temples, and some restaurants (look for shoe cubbies).\n3. Hand money or cards using both hands, placing them on the small tray provided at cash registers.\n4. Avoid pointing with fingers or chopsticks.",
         "safety_tips": "1. Japan has an extremely low crime rate, but stay aware of standard safety in nightlife zones (e.g., Roppongi or Kabukicho).\n2. Be familiar with earthquake evacuation signs and download disaster alert apps like Safety Tips.\n3. Cash is still highly favored in small shops; always carry some yen bills."
     }
-    
+
     cursor.execute("""
     INSERT INTO countries (
         country_name, capital, currency, language, timezone, emergency_number, visa_info, rules, etiquette, safety_tips
@@ -586,7 +588,7 @@ def populate_database():
         japan_data["visa_info"], japan_data["rules"], japan_data["etiquette"], japan_data["safety_tips"]
     ))
     japan_id = cursor.lastrowid
-    
+
     japan_cities = [
         # 1. Tokyo
         {
@@ -1089,14 +1091,14 @@ def populate_database():
             "safety_recommendations": "Generally very safe. Keep cash handy as some traditional craft shops don't accept cards."
         }
     ]
-    
+
     for city in japan_cities:
         cursor.execute("""
         INSERT INTO cities (
             country_id, city_name, description, transport_info, food_info, tourist_places, hotel_info, shopping_areas, airport_details, safety_recommendations
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """, (
-            city["country_id"], city["city_name"], city["description"],
+            japan_id, city["city_name"], city["description"],
             city["transport_info"], json.dumps(city["food_info"]), json.dumps(city["tourist_places"]),
             json.dumps(city["hotel_info"]), json.dumps(city["shopping_areas"]), city["airport_details"],
             city["safety_recommendations"]
@@ -1119,7 +1121,7 @@ def populate_database():
         "etiquette": "1. Keep left on escalators and let others pass on the right.\n2. Choping: locals reserve tables at hawker centres using tissue packets or umbrellas. Do not sit at a table with a tissue pack on it.\n3. Clear your food trays at food courts and hawker centers (mandatory by law).\n4. Pointing with your index finger is considered impolite; use your whole hand instead.",
         "safety_tips": "1. Singapore is one of the safest cities in the world. It is safe to walk alone at night.\n2. Drinkable tap water: tap water is safe and clean.\n3. Respect local religious temples: dress modestly, remove shoes, and do not take photos inside unless permitted."
     }
-    
+
     cursor.execute("""
     INSERT INTO countries (
         country_name, capital, currency, language, timezone, emergency_number, visa_info, rules, etiquette, safety_tips
@@ -1130,7 +1132,7 @@ def populate_database():
         singapore_data["visa_info"], singapore_data["rules"], singapore_data["etiquette"], singapore_data["safety_tips"]
     ))
     singapore_id = cursor.lastrowid
-    
+
     singapore_areas = [
         # 1. Downtown Core
         {
@@ -1615,7 +1617,7 @@ def populate_database():
             "safety_recommendations": "Chomp Chomp food court gets extremely crowded on weekend nights; go early."
         }
     ]
-    
+
     for city in singapore_areas:
         cursor.execute("""
         INSERT INTO cities (

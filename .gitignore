@@ -38,3 +38,6 @@ venv.bak/
 *.auth.json
 .agents/*
 !.agents/skills/
+
+# Build artifacts
+*.egg-info/

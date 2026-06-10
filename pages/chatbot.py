@@ -1,7 +1,14 @@
 import json
 import time
+
 import streamlit as st
-from utils.database import get_all_countries, get_cities_by_country, get_city_by_name, get_country_by_name, get_city_details, get_country_details
+
+from utils.database import (
+    get_all_countries,
+    get_cities_by_country,
+    get_city_details,
+    get_country_details,
+)
 from utils.styles import render_hero
 
 render_hero("💬 AI Travel Assistant", "Ask questions about local rules, etiquette, food, attractions, and safety tips. Answers are based on our travel database.")
@@ -9,21 +16,21 @@ render_hero("💬 AI Travel Assistant", "Ask questions about local rules, etique
 # Helper function to match keywords and generate context-rich answers
 def generate_bot_response(user_query, active_country_id, active_city_id):
     query = user_query.lower().strip()
-    
+
     # 1. Database details for active session state (context fallbacks)
     active_city = get_city_details(active_city_id) if active_city_id else None
     active_country = get_country_details(active_country_id) if active_country_id else None
-    
+
     # 2. Extract country/city names from query
     matched_country = None
     matched_city = None
-    
+
     countries = get_all_countries()
     for c in countries:
         if c["country_name"].lower() in query:
             matched_country = c
             break
-            
+
     # List all cities in DB
     for c in countries:
         cities = get_cities_by_country(c["id"])
@@ -31,15 +38,15 @@ def generate_bot_response(user_query, active_country_id, active_city_id):
             if ct["city_name"].lower() in query:
                 matched_city = ct
                 break
-                
+
     # 3. Determine target entity (City has priority, then Country, then active context)
     target_city = matched_city if matched_city else (active_city if not matched_country else None)
     target_country = matched_country if matched_country else (active_country if not target_city else None)
-    
+
     # If target city is set, get its country details too
     if target_city and not target_country:
         target_country = get_country_details(target_city["country_id"])
-        
+
     # Topic detection
     is_food = any(w in query for w in ["food", "eat", "try", "dish", "cuisine", "delicacies", "dining", "lunch", "dinner", "biryani", "sushi", "crab", "ramen"])
     is_rules = any(w in query for w in ["rule", "law", "traffic", "regulation", "fine", "forbidden", "prohibit", "chewing gum", "smoking"])
@@ -54,23 +61,23 @@ def generate_bot_response(user_query, active_country_id, active_city_id):
     if target_city:
         city_name = target_city["city_name"]
         country_name = target_country["country_name"] if target_country else ""
-        
+
         if is_food:
             try:
                 foods = json.loads(target_city["food_info"])
                 food_list = "\n".join([f"- **{f['name']}** ({f['type']}): {f['desc']}" for f in foods])
                 return f"🍲 **Here are the must-try foods in {city_name} ({country_name}):**\n\n{food_list}\n\n*Make sure to check out local street food stalls for the most authentic taste!*"
-            except:
+            except Exception:
                 return f"🍲 Stored food info for {city_name}: {target_city['food_info']}"
-                
+
         elif is_attraction:
             try:
                 places = json.loads(target_city["tourist_places"])
                 place_list = "\n".join([f"- **{p['name']}** ({p.get('rating', '4.5')}) - {p['desc']} Best visited in the *{p.get('time', 'day')}*." for p in places])
                 return f"🎡 **Top tourist attractions in {city_name}:**\n\n{place_list}"
-            except:
+            except Exception:
                 return f"🎡 Stored attractions for {city_name}: {target_city['tourist_places']}"
-                
+
         elif is_hotel:
             try:
                 hotels = json.loads(target_city["hotel_info"])
@@ -78,41 +85,41 @@ def generate_bot_response(user_query, active_country_id, active_city_id):
                 for tier, details in hotels.items():
                     hotel_list += f"- **{tier.upper()}**: {details['name']} ({details.get('price', '')}) - *{details['desc']}*\n"
                 return f"🏨 **Recommended stays in {city_name}:**\n\n{hotel_list}"
-            except:
+            except Exception:
                 return f"🏨 Stored hotels for {city_name}: {target_city['hotel_info']}"
-                
+
         elif is_transport:
             return f"🚌 **Transit guide for {city_name}:**\n\n- **Public Transport:** {target_city['transport_info']}\n\n- **Airport Details:** {target_city['airport_details']}"
-            
+
         elif is_safety:
             return f"🛡️ **Safety Recommendations for {city_name}:**\n\n{target_city['safety_recommendations']}"
-            
+
         elif is_rules or is_etiquette:
             # Fallback to country rules since rules are usually country-wide
             return f"📜 **Rules & Etiquette to follow in {city_name} (referencing {country_name} guidelines):**\n\n**Rules:**\n{target_country['rules']}\n\n**Cultural Etiquette:**\n{target_country['etiquette']}"
-            
+
         else:
             # General city info response
             return f"🏙️ **Welcome to {city_name}!**\n\n{target_city['description']}\n\nAsk me specific questions like:\n- *What food should I try in {city_name}?*\n- *What are the tourist attractions in {city_name}?*\n- *How is the public transport in {city_name}?*"
 
     elif target_country:
         country_name = target_country["country_name"]
-        
+
         if is_rules:
             rules_formatted = "\n".join([f"- {r}" for r in target_country["rules"].split("\n") if r.strip()])
             return f"📜 **Important Rules & Regulations to follow in {country_name}:**\n\n{rules_formatted}\n\n*Violating local regulations can lead to hefty fines, so keep these in mind!*"
-            
+
         elif is_etiquette:
             et_formatted = "\n".join([f"- {e}" for e in target_country["etiquette"].split("\n") if e.strip()])
             return f"🤝 **Cultural Dos and Don'ts for {country_name}:**\n\n{et_formatted}"
-            
+
         elif is_safety:
             safety_formatted = "\n".join([f"- {s}" for s in target_country["safety_tips"].split("\n") if s.strip()])
             return f"🛡️ **Safety Guidelines for {country_name}:**\n\n{safety_formatted}\n\n🚨 **Emergency Numbers:** {target_country['emergency_number']}"
-            
+
         elif is_visa:
             return f"📑 **Visa & Entry information for {country_name}:**\n\n{target_country['visa_info']}"
-            
+
         else:
             # General country info response
             return f"🌍 **Welcome to {country_name}!**\n\n- **Capital:** {target_country['capital']}\n- **Currency:** {target_country['currency']}\n- **Language:** {target_country['language']}\n- **Timezone:** {target_country['timezone']}\n\nAsk me specific questions like:\n- *What are the traffic rules in {country_name}?*\n- *What is the cultural etiquette in {country_name}?*\n- *How do I get a visa for {country_name}?*"
@@ -173,14 +180,14 @@ if user_prompt:
     with st.chat_message("user"):
         st.markdown(user_prompt)
     st.session_state.messages.append({"role": "user", "content": user_prompt})
-    
+
     # Generate response
     response = generate_bot_response(
-        user_prompt, 
+        user_prompt,
         st.session_state.get("selected_country_id"),
         st.session_state.get("selected_city_id")
     )
-    
+
     # Display assistant response with a simulated typing speed
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
@@ -191,5 +198,5 @@ if user_prompt:
             time.sleep(0.04) # brief delay
             message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
-        
+
     st.session_state.messages.append({"role": "assistant", "content": response})

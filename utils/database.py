@@ -1,6 +1,5 @@
 import os
 import sqlite3
-import json
 
 DB_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database")
 DB_PATH = os.path.join(DB_DIR, "travel.db")
@@ -16,10 +15,10 @@ def init_db():
     """Creates the tables if they do not exist and populates them if empty."""
     conn = get_connection()
     cursor = conn.cursor()
-    
+
     # Enable foreign key support
     cursor.execute("PRAGMA foreign_keys = ON;")
-    
+
     # Create countries table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS countries (
@@ -36,7 +35,7 @@ def init_db():
         safety_tips TEXT NOT NULL
     );
     """)
-    
+
     # Create cities table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS cities (
@@ -55,9 +54,9 @@ def init_db():
         UNIQUE(country_id, city_name)
     );
     """)
-    
+
     conn.commit()
-    
+
     # Check if empty. If so, seed database with sample data.
     cursor.execute("SELECT COUNT(*) as count FROM countries;")
     row = cursor.fetchone()
@@ -130,18 +129,18 @@ def search_locations(query):
     """
     if not query or not query.strip():
         return {"countries": [], "cities": []}
-    
+
     q = f"%{query.strip()}%"
     conn = get_connection()
     cursor = conn.cursor()
-    
+
     # Search countries
     cursor.execute("""
         SELECT * FROM countries 
         WHERE country_name LIKE ? OR capital LIKE ? OR language LIKE ?;
     """, (q, q, q))
     countries = [dict(row) for row in cursor.fetchall()]
-    
+
     # Search cities
     cursor.execute("""
         SELECT cities.*, countries.country_name 
@@ -150,6 +149,6 @@ def search_locations(query):
         WHERE city_name LIKE ? OR description LIKE ? OR tourist_places LIKE ?;
     """, (q, q, q))
     cities = [dict(row) for row in cursor.fetchall()]
-    
+
     conn.close()
     return {"countries": countries, "cities": cities}

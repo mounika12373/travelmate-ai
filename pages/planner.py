@@ -1,7 +1,9 @@
 import json
-import streamlit as st
+
 import pandas as pd
 import plotly.express as px
+import streamlit as st
+
 from utils.database import get_all_countries, get_cities_by_country, get_city_details, get_country_details
 from utils.styles import render_hero, render_html
 
@@ -31,7 +33,7 @@ col_in1, col_in2, col_in3 = st.columns(3)
 with col_in1:
     city_options = [f"{c['city_name']} ({c['country_name']})" for c in all_cities]
     selected_option = st.selectbox("Where do you want to go?", city_options)
-    
+
     # Extract selected city details
     sel_city_index = city_options.index(selected_option)
     selected_city_meta = all_cities[sel_city_index]
@@ -44,7 +46,7 @@ with col_in2:
 
 with col_in3:
     budget_tier = st.selectbox(
-        "Choose Budget Tier", 
+        "Choose Budget Tier",
         ["Economy (Cost-Effective)", "Mid-Range (Balanced)", "Luxury (Premium Experience)"]
     )
     # Simplify budget string key
@@ -55,22 +57,22 @@ st.divider()
 # Process data
 try:
     attractions = json.loads(city["tourist_places"])
-except:
+except Exception:
     attractions = []
 
 try:
     hotels = json.loads(city["hotel_info"])
-except:
+except Exception:
     hotels = {}
 
 try:
     shopping = json.loads(city["shopping_areas"])
-except:
+except Exception:
     shopping = []
 
 try:
     foods = json.loads(city["food_info"])
-except:
+except Exception:
     foods = []
 
 # Dynamic Budget calculations
@@ -87,7 +89,7 @@ if country["country_name"].lower() == "india":
         base_daily_rates = {"accommodation": 7500, "food": 2500, "transport": 1200, "sightseeing": 1500, "shopping": 2000}
     else:
         base_daily_rates = {"accommodation": 25000, "food": 6000, "transport": 4000, "sightseeing": 4000, "shopping": 8000}
-        
+
 elif country["country_name"].lower() == "japan":
     currency_symbol = "¥"
     currency_code = "JPY"
@@ -122,12 +124,12 @@ col_plan, col_budget = st.columns([3, 2])
 
 with col_plan:
     st.markdown(f"### 🗺️ Custom Itinerary: {num_days} Days in {city['city_name']}")
-    
+
     # Hotel recommendation
     hotel_suggestion = hotels.get(budget_key, {"name": "Local Stay", "desc": "Conveniently located accommodation.", "price": ""})
     st.info(f"🏨 **Recommended Stay ({budget_tier.split(' ')[0]}):** **{hotel_suggestion['name']}**\n\n*{hotel_suggestion['desc']}* (Est: {hotel_suggestion.get('price', '')})")
     st.write("")
-    
+
     # Distribute elements dynamically
     for day in range(1, num_days + 1):
         render_html(f"""
@@ -135,42 +137,42 @@ with col_plan:
                 <h4 style="color: var(--primary-color); margin-top:0;">📅 Day {day} - Exploring the Heart of the City</h4>
             </div>
         """)
-        
+
         # Determine morning/afternoon attractions based on index
         attract_indices = [(day*2 - 2) % len(attractions), (day*2 - 1) % len(attractions)] if attractions else []
         morning_att = attractions[attract_indices[0]] if len(attract_indices) > 0 and attractions else None
         afternoon_att = attractions[attract_indices[1]] if len(attract_indices) > 1 and attractions else None
-        
+
         # Get food option
         food_opt = foods[(day - 1) % len(foods)] if foods else None
         # Get shopping option
         shop_opt = shopping[(day - 1) % len(shopping)] if shopping else None
-        
+
         # Details
         if morning_att:
             st.markdown(f"**☀️ Morning: Visit {morning_att['name']}**")
             st.caption(f"{morning_att['desc']} (Rating: {morning_att.get('rating', '4.5')})")
-            
+
         if food_opt:
             st.markdown(f"**😋 Lunch: Try local {food_opt['name']}**")
             st.caption(f"{food_opt['desc']}")
-            
+
         if afternoon_att:
             st.markdown(f"**⛅ Afternoon: Tour {afternoon_att['name']}**")
             st.caption(f"{afternoon_att['desc']} (Rating: {afternoon_att.get('rating', '4.5')})")
-            
+
         if shop_opt:
             st.markdown(f"**🛍️ Evening: Shop at {shop_opt['name']}**")
             st.caption(f"{shop_opt['desc']}")
         else:
             st.markdown("**🌆 Evening: Free exploration and dining**")
             st.caption("Walk through local streets, discover street food stalls, and interact with the local culture.")
-            
+
         st.divider()
 
 with col_budget:
     st.markdown("### 💰 Estimated Budget Breakdown")
-    
+
     # Display Key Metrics
     render_html(f"""
         <div style="background-color: var(--secondary-background-color); border: 2px solid var(--primary-color); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 25px;">
@@ -179,18 +181,18 @@ with col_budget:
             <div style="font-size: 0.85rem; color: gray; margin-top:5px;">For {num_days} days &bull; {budget_tier.split(' ')[0]} tier</div>
         </div>
     """)
-    
+
     # Dataframe for table and chart
     budget_data = {
         "Expense Category": ["🏨 Accommodation", "🍜 Food & Dining", "🚌 Transport", "🎟️ Sightseeing", "🎁 Shopping/Misc"],
         "Amount": [accommodation_cost, food_cost, transport_cost, sightseeing_cost, shopping_cost]
     }
     df_budget = pd.DataFrame(budget_data)
-    
+
     # Plotly pie chart
     fig = px.pie(
-        df_budget, 
-        values="Amount", 
+        df_budget,
+        values="Amount",
         names="Expense Category",
         color_discrete_sequence=px.colors.qualitative.Pastel,
         hole=0.4
@@ -201,15 +203,15 @@ with col_budget:
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)"
     )
-    
+
     st.plotly_chart(fig, use_container_width=True)
-    
+
     # Cost Table
     st.markdown("##### Detailed Allocation Table")
     formatted_df = df_budget.copy()
     formatted_df["Amount"] = formatted_df["Amount"].apply(lambda x: f"{currency_symbol} {x:,} {currency_code}")
     st.table(formatted_df)
-    
+
     # Local Transit & Safety Warning Card
     st.markdown("### ℹ️ Important Travel Tips")
     with st.container(border=True):

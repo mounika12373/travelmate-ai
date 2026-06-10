@@ -1,5 +1,6 @@
+
 import streamlit as st
-import textwrap
+
 
 def render_html(html_str, sidebar=False):
     """Cleanly renders HTML in Streamlit without markdown code-block triggers."""
@@ -159,13 +160,14 @@ def inject_global_css():
 
 import base64
 
+
 def get_image_base64(image_path):
     """Converts a local image file to a base64 encoded string."""
     try:
         with open(image_path, "rb") as image_file:
             encoded = base64.b64encode(image_file.read()).decode()
             return f"data:image/png;base64,{encoded}"
-    except Exception as e:
+    except Exception:
         return ""
 
 def render_hero(title, subtitle, image_path=None):
@@ -175,7 +177,7 @@ def render_hero(title, subtitle, image_path=None):
         base64_img = get_image_base64(image_path)
         if base64_img:
             style_attr = f"style=\"background-image: linear-gradient(135deg, rgba(13, 21, 39, 0.85), rgba(26, 54, 93, 0.65)), url('{base64_img}'); background-size: cover; background-position: center;\""
-            
+
     render_html(f"""
         <div class="hero-banner" {style_attr}>
             <h1>{title}</h1>
@@ -186,7 +188,7 @@ def render_hero(title, subtitle, image_path=None):
 def render_image_card(title, content, image_path, badges=None, height="260px"):
     """Helper to render a styled HTML card with a background image and text overlay."""
     base64_img = get_image_base64(image_path)
-    
+
     badge_html = ""
     if badges:
         if isinstance(badges, list):
@@ -196,7 +198,7 @@ def render_image_card(title, content, image_path, badges=None, height="260px"):
             badge_html = f'<span class="rating-badge">{badges}</span>'
 
     bg_style = f"background-image: linear-gradient(180deg, rgba(0,0,0,0.1), rgba(11, 19, 43, 0.9)), url('{base64_img}');" if base64_img else "background: var(--secondary-background-color);"
-    
+
     render_html(f"""
         <div class="travel-card" style="{bg_style} background-size: cover; background-position: center; min-height: {height}; display: flex; flex-direction: column; justify-content: flex-end; color: white !important;">
             <div style="position: absolute; top: 15px; right: 15px; display: flex; gap: 5px;">
@@ -218,11 +220,11 @@ def render_card(title, content, badges=None, price_badge=None, extra_html=""):
                 badge_html += f'<span class="tag-badge">{b}</span>'
         else:
             badge_html = f'<span class="rating-badge">{badges}</span>'
-            
+
     p_badge_html = ""
     if price_badge:
         p_badge_html = f'<span class="price-badge">{price_badge}</span>'
-        
+
     render_html(f"""
         <div class="travel-card">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
