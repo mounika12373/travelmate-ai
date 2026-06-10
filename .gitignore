@@ -26,3 +26,15 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Spec-Kit / Specify CLI specific files
+.specify/extensions/.cache/
+.specify/extensions/.backup/
+.specify/extensions/*/local-config.yml
+
+# Credentials and sensitive configurations
+.claude/
+.codex/
+*.auth.json
+.agents/*
+!.agents/skills/
