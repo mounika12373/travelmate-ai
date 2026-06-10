@@ -1,3 +1,8 @@
+import os
+import sys
+# Ensure the root of the project is in the python path
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+
 import streamlit as st
 from utils.database import init_db, get_all_countries, get_cities_by_country
 from utils.styles import inject_global_css, render_html
