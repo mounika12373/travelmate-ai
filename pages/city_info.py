@@ -3,6 +3,7 @@ import json
 import streamlit as st
 
 from utils.database import get_all_countries, get_cities_by_country, get_city_details
+from utils.i18n import translate_ui
 from utils.styles import render_card, render_hero
 
 
@@ -13,7 +14,7 @@ def make_maps_link(item_name, city_name):
 # Sidebar selectors for quick context changing
 countries = get_all_countries()
 if not countries:
-    st.error("No countries available. Please seed database.")
+    st.error(translate_ui("no_travel_data"))
     st.stop()
 
 # Sync country
@@ -25,11 +26,11 @@ if st.session_state.selected_country_id:
             current_c_index = idx
             break
 
-st.sidebar.subheader("Select Destination")
+st.sidebar.subheader(translate_ui("select_destination"))
 selected_country_name = st.sidebar.selectbox(
-    "Country",
+    translate_ui("country_label"),
     country_names,
-    index=current_c_index,
+    index=current_c_index if current_c_index < len(country_names) else 0,
     key="city_info_country_select"
 )
 selected_country = next(c for c in countries if c["country_name"] == selected_country_name)
@@ -38,7 +39,7 @@ st.session_state.selected_country_id = selected_country["id"]
 # Fetch cities for chosen country
 cities = get_cities_by_country(st.session_state.selected_country_id)
 if not cities:
-    st.sidebar.warning("No cities in this country.")
+    st.sidebar.warning(translate_ui("no_cities_warning"))
     st.stop()
 
 city_names = [ct["city_name"] for ct in cities]
@@ -50,7 +51,7 @@ if st.session_state.selected_city_id:
             break
 
 selected_city_name = st.sidebar.selectbox(
-    "City",
+    translate_ui("city_label"),
     city_names,
     index=current_ct_index if current_ct_index < len(city_names) else 0,
     key="city_info_city_select"
@@ -66,17 +67,17 @@ render_hero(city["city_name"], city["description"])
 
 # City details layout
 tab_attract, tab_food, tab_hotel, tab_transit = st.tabs([
-    "🎡 Attractions & Shopping",
-    "🍲 Local Delicacies",
-    "🏨 Recommended Stays",
-    "🚌 Transit & Airport Guide"
+    translate_ui("attractions_tab"),
+    translate_ui("food_tab"),
+    translate_ui("stays_tab"),
+    translate_ui("transit_tab")
 ])
 
 # 1. Attractions & Shopping
 with tab_attract:
     try:
         places = json.loads(city["tourist_places"])
-        st.markdown("### 🎡 Top Attractions to Visit")
+        st.markdown(translate_ui("top_attractions"))
 
         # Grid of columns for attractions (2-column layout for spacious look)
         cols = st.columns(2)
@@ -101,7 +102,7 @@ with tab_attract:
 
     try:
         shops = json.loads(city["shopping_areas"])
-        st.markdown("### 🛍️ Famous Shopping Spots")
+        st.markdown(translate_ui("famous_shopping"))
 
         # Grid of columns for shopping
         shop_cols = st.columns(2)
@@ -111,7 +112,7 @@ with tab_attract:
                 render_card(
                     title=f"🛍️ {shop['name']}",
                     content=shop['desc'],
-                    badges="Shopping Area",
+                    badges=translate_ui("shopping_area_badge"),
                     extra_html=make_maps_link(shop['name'], city['city_name'])
                 )
     except Exception:
@@ -122,7 +123,7 @@ with tab_attract:
 with tab_food:
     try:
         foods = json.loads(city["food_info"])
-        st.markdown("### 🍲 Must-Try Famous Dishes")
+        st.markdown(translate_ui("must_try_dishes"))
 
         # Categorize foods dynamically to avoid clutter
         veg_foods = []
@@ -143,25 +144,25 @@ with tab_food:
             col_veg, col_nonveg = st.columns(2)
 
             with col_veg:
-                st.markdown("#### 🟢 Vegetarian Delights")
+                st.markdown(translate_ui("veg_delights"))
                 for food in veg_foods:
                     render_card(
                         title=f"🍲 {food['name']}",
                         content=food["desc"],
-                        badges=["Vegetarian"]
+                        badges=[translate_ui("vegetarian_badge")]
                     )
 
             with col_nonveg:
-                st.markdown("#### 🔴 Non-Vegetarian Specials")
+                st.markdown(translate_ui("non_veg_specials"))
                 for food in non_veg_foods:
                     render_card(
                         title=f"🍗 {food['name']}",
                         content=food["desc"],
-                        badges=["Non-Vegetarian"]
+                        badges=[translate_ui("non_vegetarian_badge")]
                     )
 
             if other_foods:
-                st.markdown("#### 🌟 Local Favorites")
+                st.markdown(translate_ui("local_favorites"))
                 other_cols = st.columns(2)
                 for idx, food in enumerate(other_foods):
                     col = other_cols[idx % 2]
@@ -181,12 +182,16 @@ with tab_food:
                     emoji = "🍲"
                     if "non-veg" in ftype.lower():
                         emoji = "🍗"
+                        trans_badge = translate_ui("non_vegetarian_badge")
                     elif "veg" in ftype.lower():
                         emoji = "🟢"
+                        trans_badge = translate_ui("vegetarian_badge")
+                    else:
+                        trans_badge = ftype
                     render_card(
                         title=f"{emoji} {food['name']}",
                         content=food["desc"],
-                        badges=[ftype]
+                        badges=[trans_badge]
                     )
     except Exception:
         st.error("Error loading food details.")
@@ -194,7 +199,7 @@ with tab_food:
 
 # 3. Recommended Stays (Hotels)
 with tab_hotel:
-    st.markdown("### 🏨 Recommended Accommodations")
+    st.markdown(translate_ui("recommended_accommodations"))
     try:
         hotels = json.loads(city["hotel_info"])
 
@@ -202,7 +207,7 @@ with tab_hotel:
         col_bud, col_mid, col_lux = st.columns(3)
 
         with col_bud:
-            st.markdown("#### 🪙 Budget Friendly")
+            st.markdown(translate_ui("budget_friendly"))
             bud = hotels.get("budget")
             if bud:
                 render_card(
@@ -215,7 +220,7 @@ with tab_hotel:
                 st.caption("No budget accommodation listed.")
 
         with col_mid:
-            st.markdown("#### 🏢 Mid-Range Comfort")
+            st.markdown(translate_ui("mid_range_comfort"))
             mid = hotels.get("mid_range")
             if mid:
                 render_card(
@@ -228,7 +233,7 @@ with tab_hotel:
                 st.caption("No mid-range accommodation listed.")
 
         with col_lux:
-            st.markdown("#### 💎 Luxury Stay")
+            st.markdown(translate_ui("luxury_stay"))
             lux = hotels.get("luxury")
             if lux:
                 render_card(
@@ -249,19 +254,19 @@ with tab_transit:
     def to_bullets(text):
         if not text:
             return ""
-        # Split by period followed by whitespace and a capital letter
-        sentences = re.split(r'\.\s+(?=[A-Z])', text.strip())
+        # Split by period followed by whitespace and a capital letter or localized letters
+        sentences = re.split(r'\.\s+(?=[A-Z]|[\u0900-\u097F]|[\u0C00-\u0C7F])', text.strip())
         return "\n".join(["- " + s.rstrip('.') + "." for s in sentences if s.strip()])
 
     col_airport, col_metro = st.columns(2)
 
     with col_airport:
-        st.markdown("### ✈️ Airport Access Details")
+        st.markdown(translate_ui("airport_access"))
         st.info(to_bullets(city["airport_details"]))
 
     with col_metro:
-        st.markdown("### 🚌 Local Public Transportation")
+        st.markdown(translate_ui("public_transport"))
         st.success(to_bullets(city["transport_info"]))
 
-    st.subheader("🛡️ Safety Recommendations for " + city["city_name"])
+    st.subheader(translate_ui("safety_recommendations_for") + city["city_name"])
     st.warning(to_bullets(city["safety_recommendations"]))

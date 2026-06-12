@@ -9,13 +9,16 @@ from utils.database import (
     get_city_details,
     get_country_details,
 )
+from utils.i18n import get_english_term, translate_ui
 from utils.styles import render_hero
 
-render_hero("💬 AI Travel Assistant", "Ask questions about local rules, etiquette, food, attractions, and safety tips. Answers are based on our travel database.")
+render_hero(translate_ui("ai_chatbot_title"), translate_ui("ai_chatbot_subtitle"))
 
 # Helper function to match keywords and generate context-rich answers
 def generate_bot_response(user_query, active_country_id, active_city_id):
-    query = user_query.lower().strip()
+    # Normalize user_query to English keywords
+    eng_query = get_english_term(user_query)
+    query = eng_query.lower().strip()
 
     # 1. Database details for active session state (context fallbacks)
     active_city = get_city_details(active_city_id) if active_city_id else None
@@ -27,7 +30,8 @@ def generate_bot_response(user_query, active_country_id, active_city_id):
 
     countries = get_all_countries()
     for c in countries:
-        if c["country_name"].lower() in query:
+        # Match against either English query or raw user query (translated country names)
+        if c["country_name"].lower() in query or c["country_name"].lower() in user_query.lower():
             matched_country = c
             break
 
@@ -35,7 +39,7 @@ def generate_bot_response(user_query, active_country_id, active_city_id):
     for c in countries:
         cities = get_cities_by_country(c["id"])
         for ct in cities:
-            if ct["city_name"].lower() in query:
+            if ct["city_name"].lower() in query or ct["city_name"].lower() in user_query.lower():
                 matched_city = ct
                 break
 
@@ -47,7 +51,7 @@ def generate_bot_response(user_query, active_country_id, active_city_id):
     if target_city and not target_country:
         target_country = get_country_details(target_city["country_id"])
 
-    # Topic detection
+    # Topic detection (on English normalized query)
     is_food = any(w in query for w in ["food", "eat", "try", "dish", "cuisine", "delicacies", "dining", "lunch", "dinner", "biryani", "sushi", "crab", "ramen"])
     is_rules = any(w in query for w in ["rule", "law", "traffic", "regulation", "fine", "forbidden", "prohibit", "chewing gum", "smoking"])
     is_etiquette = any(w in query for w in ["etiquette", "culture", "do", "don't", "respect", "bow", "tip", "shoe", "hand", "custom"])
@@ -66,7 +70,7 @@ def generate_bot_response(user_query, active_country_id, active_city_id):
             try:
                 foods = json.loads(target_city["food_info"])
                 food_list = "\n".join([f"- **{f['name']}** ({f['type']}): {f['desc']}" for f in foods])
-                return f"🍲 **Here are the must-try foods in {city_name} ({country_name}):**\n\n{food_list}\n\n*Make sure to check out local street food stalls for the most authentic taste!*"
+                return translate_ui("bot_food_city").format(city=city_name, country=country_name, list=food_list)
             except Exception:
                 return f"🍲 Stored food info for {city_name}: {target_city['food_info']}"
 
@@ -74,7 +78,7 @@ def generate_bot_response(user_query, active_country_id, active_city_id):
             try:
                 places = json.loads(target_city["tourist_places"])
                 place_list = "\n".join([f"- **{p['name']}** ({p.get('rating', '4.5')}) - {p['desc']} Best visited in the *{p.get('time', 'day')}*." for p in places])
-                return f"🎡 **Top tourist attractions in {city_name}:**\n\n{place_list}"
+                return translate_ui("bot_attract_city").format(city=city_name, list=place_list)
             except Exception:
                 return f"🎡 Stored attractions for {city_name}: {target_city['tourist_places']}"
 
@@ -84,80 +88,78 @@ def generate_bot_response(user_query, active_country_id, active_city_id):
                 hotel_list = ""
                 for tier, details in hotels.items():
                     hotel_list += f"- **{tier.upper()}**: {details['name']} ({details.get('price', '')}) - *{details['desc']}*\n"
-                return f"🏨 **Recommended stays in {city_name}:**\n\n{hotel_list}"
+                return translate_ui("bot_hotel_city").format(city=city_name, list=hotel_list)
             except Exception:
                 return f"🏨 Stored hotels for {city_name}: {target_city['hotel_info']}"
 
         elif is_transport:
-            return f"🚌 **Transit guide for {city_name}:**\n\n- **Public Transport:** {target_city['transport_info']}\n\n- **Airport Details:** {target_city['airport_details']}"
+            return translate_ui("bot_transit_city").format(city=city_name, transit=target_city['transport_info'], airport=target_city['airport_details'])
 
         elif is_safety:
-            return f"🛡️ **Safety Recommendations for {city_name}:**\n\n{target_city['safety_recommendations']}"
+            return translate_ui("bot_safety_city").format(city=city_name, safety=target_city['safety_recommendations'])
 
         elif is_rules or is_etiquette:
             # Fallback to country rules since rules are usually country-wide
-            return f"📜 **Rules & Etiquette to follow in {city_name} (referencing {country_name} guidelines):**\n\n**Rules:**\n{target_country['rules']}\n\n**Cultural Etiquette:**\n{target_country['etiquette']}"
+            return translate_ui("bot_rules_city").format(city=city_name, country=country_name, rules=target_country['rules'], etiquette=target_country['etiquette'])
 
         else:
             # General city info response
-            return f"🏙️ **Welcome to {city_name}!**\n\n{target_city['description']}\n\nAsk me specific questions like:\n- *What food should I try in {city_name}?*\n- *What are the tourist attractions in {city_name}?*\n- *How is the public transport in {city_name}?*"
+            return translate_ui("bot_welcome_city").format(city=city_name, desc=target_city['description'])
 
     elif target_country:
         country_name = target_country["country_name"]
 
         if is_rules:
             rules_formatted = "\n".join([f"- {r}" for r in target_country["rules"].split("\n") if r.strip()])
-            return f"📜 **Important Rules & Regulations to follow in {country_name}:**\n\n{rules_formatted}\n\n*Violating local regulations can lead to hefty fines, so keep these in mind!*"
+            return translate_ui("bot_rules_country").format(country=country_name, rules=rules_formatted)
 
         elif is_etiquette:
             et_formatted = "\n".join([f"- {e}" for e in target_country["etiquette"].split("\n") if e.strip()])
-            return f"🤝 **Cultural Dos and Don'ts for {country_name}:**\n\n{et_formatted}"
+            return translate_ui("bot_etiquette_country").format(country=country_name, etiquette=et_formatted)
 
         elif is_safety:
             safety_formatted = "\n".join([f"- {s}" for s in target_country["safety_tips"].split("\n") if s.strip()])
-            return f"🛡️ **Safety Guidelines for {country_name}:**\n\n{safety_formatted}\n\n🚨 **Emergency Numbers:** {target_country['emergency_number']}"
+            return translate_ui("bot_safety_country").format(country=country_name, safety=safety_formatted, emergency=target_country['emergency_number'])
 
         elif is_visa:
-            return f"📑 **Visa & Entry information for {country_name}:**\n\n{target_country['visa_info']}"
+            return translate_ui("bot_visa_country").format(country=country_name, visa=target_country['visa_info'])
 
         else:
             # General country info response
-            return f"🌍 **Welcome to {country_name}!**\n\n- **Capital:** {target_country['capital']}\n- **Currency:** {target_country['currency']}\n- **Language:** {target_country['language']}\n- **Timezone:** {target_country['timezone']}\n\nAsk me specific questions like:\n- *What are the traffic rules in {country_name}?*\n- *What is the cultural etiquette in {country_name}?*\n- *How do I get a visa for {country_name}?*"
+            return translate_ui("bot_welcome_country").format(
+                country=country_name,
+                capital=target_country['capital'],
+                currency=target_country['currency'],
+                language=target_country['language'],
+                timezone=target_country['timezone']
+            )
 
     # Fallback when no keywords or locations matched
-    return (
-        "👋 Hello! I am your AI Travel Companion.\n\n"
-        "I can answer questions regarding **local laws, customs, safety, transport, delicacies, and hotels** "
-        "for the following destinations currently in my database:\n"
-        "- **India** (Hyderabad, Visakhapatnam)\n"
-        "- **Japan** (Tokyo, Osaka)\n"
-        "- **Singapore** (Singapore City)\n\n"
-        "Try asking me queries like:\n"
-        "- *What should I know before visiting Tokyo?*\n"
-        "- *What are the traffic rules in Singapore?*\n"
-        "- *What food should I try in Hyderabad?*\n"
-        "- *What is the currency in Japan?*"
-    )
+    return translate_ui("bot_fallback")
 
 
-# 4. Chat Interface
-if "messages" not in st.session_state:
+# Clear chat history if language changes (ensures consistent language context)
+if "chat_language" not in st.session_state:
+    st.session_state.chat_language = st.session_state.get("language", "en")
+
+if "messages" not in st.session_state or st.session_state.chat_language != st.session_state.get("language", "en"):
     st.session_state.messages = [
-        {"role": "assistant", "content": "Hello! I am your TravelMate AI Assistant. Ask me anything about local rules, etiquette, food, and stays for India, Japan, or Singapore."}
+        {"role": "assistant", "content": translate_ui("chat_bot_welcome")}
     ]
+    st.session_state.chat_language = st.session_state.get("language", "en")
 
 # Display quick suggest options
-st.markdown("##### 💡 Suggested Questions")
+st.markdown(translate_ui("suggested_questions"))
 sug_col1, sug_col2, sug_col3 = st.columns(3)
 
 with sug_col1:
-    if st.button("🍽️ Hyderabad food?", use_container_width=True):
+    if st.button(translate_ui("suggest_hyd_food"), use_container_width=True):
         st.session_state.prompt_trigger = "What food should I try in Hyderabad?"
 with sug_col2:
-    if st.button("🚦 Singapore rules?", use_container_width=True):
+    if st.button(translate_ui("suggest_sg_rules"), use_container_width=True):
         st.session_state.prompt_trigger = "What are the rules in Singapore?"
 with sug_col3:
-    if st.button("👘 Tokyo etiquette?", use_container_width=True):
+    if st.button(translate_ui("suggest_tokyo_etiq"), use_container_width=True):
         st.session_state.prompt_trigger = "What is the cultural etiquette in Tokyo?"
 
 # Process quick triggers
@@ -167,7 +169,7 @@ if "prompt_trigger" in st.session_state and st.session_state.prompt_trigger:
     st.session_state.prompt_trigger = None # Reset trigger
 else:
     # Get user input from chat input box
-    user_prompt = st.chat_input("Ask about rules, food, stays, or safety...")
+    user_prompt = st.chat_input(translate_ui("chat_placeholder"))
 
 # Render chat history
 for message in st.session_state.messages:

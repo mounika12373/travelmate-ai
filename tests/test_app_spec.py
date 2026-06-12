@@ -35,7 +35,7 @@ def describe_app_router():
         monkeypatch.setitem(sys.modules, "utils.styles", mock_styles)
 
         # Import app to trigger initialization
-        import app
+        import app  # noqa: F401
 
         # Verify page configuration and side-effects
         assert mock_st.set_page_config.called

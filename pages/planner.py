@@ -5,9 +5,11 @@ import plotly.express as px
 import streamlit as st
 
 from utils.database import get_all_countries, get_cities_by_country, get_city_details, get_country_details
+from utils.i18n import translate_ui
 from utils.styles import render_hero, render_html
 
-render_hero("📅 Smart Travel Planner", "Plan your custom itinerary, calculate your budget breakdown, and view customized hotel recommendations.")
+# Render localized hero
+render_hero(translate_ui("smart_planner_title"), translate_ui("smart_planner_subtitle"))
 
 # Load destinations list
 countries = get_all_countries()
@@ -23,16 +25,16 @@ for c in countries:
         })
 
 if not all_cities:
-    st.error("No cities available in the database. Please seed the database.")
+    st.error(translate_ui("no_cities_warning"))
     st.stop()
 
 # 1. Inputs Section
-st.subheader("⚙️ Customize Your Trip")
+st.subheader(translate_ui("customize_trip"))
 col_in1, col_in2, col_in3 = st.columns(3)
 
 with col_in1:
     city_options = [f"{c['city_name']} ({c['country_name']})" for c in all_cities]
-    selected_option = st.selectbox("Where do you want to go?", city_options)
+    selected_option = st.selectbox(translate_ui("where_to_go"), city_options)
 
     # Extract selected city details
     sel_city_index = city_options.index(selected_option)
@@ -42,15 +44,27 @@ with col_in1:
     country = get_country_details(city["country_id"])
 
 with col_in2:
-    num_days = st.slider("Number of Days", min_value=1, max_value=7, value=3)
+    num_days = st.slider(translate_ui("number_of_days"), min_value=1, max_value=7, value=3)
 
 with col_in3:
+    economy_label = translate_ui("budget_economy")
+    mid_range_label = translate_ui("budget_mid_range")
+    luxury_label = translate_ui("budget_luxury")
+    
     budget_tier = st.selectbox(
-        "Choose Budget Tier",
-        ["Economy (Cost-Effective)", "Mid-Range (Balanced)", "Luxury (Premium Experience)"]
+        translate_ui("choose_budget_tier"),
+        [economy_label, mid_range_label, luxury_label]
     )
     # Simplify budget string key
-    budget_key = "budget" if "Economy" in budget_tier else ("mid_range" if "Mid-Range" in budget_tier else "luxury")
+    if budget_tier == economy_label:
+        budget_key = "budget"
+        budget_tier_display = "Economy"
+    elif budget_tier == mid_range_label:
+        budget_key = "mid_range"
+        budget_tier_display = "Mid-Range"
+    else:
+        budget_key = "luxury"
+        budget_tier_display = "Luxury"
 
 st.divider()
 
@@ -80,7 +94,12 @@ currency_symbol = "S$"
 currency_code = "SGD"
 base_daily_rates = {} # Rates in local currency
 
-if country["country_name"].lower() == "india":
+# Note: country name might be returned translated! Check orig name or check both
+c_name_lower = country["country_name"].lower()
+is_india = c_name_lower in ["india", "भारत", "భారతదేశం"]
+is_japan = c_name_lower in ["japan", "जापान", "జపాన్"]
+
+if is_india:
     currency_symbol = "₹"
     currency_code = "INR"
     if budget_key == "budget":
@@ -90,7 +109,7 @@ if country["country_name"].lower() == "india":
     else:
         base_daily_rates = {"accommodation": 25000, "food": 6000, "transport": 4000, "sightseeing": 4000, "shopping": 8000}
 
-elif country["country_name"].lower() == "japan":
+elif is_japan:
     currency_symbol = "¥"
     currency_code = "JPY"
     if budget_key == "budget":
@@ -123,18 +142,20 @@ total_budget = accommodation_cost + food_cost + transport_cost + sightseeing_cos
 col_plan, col_budget = st.columns([3, 2])
 
 with col_plan:
-    st.markdown(f"### 🗺️ Custom Itinerary: {num_days} Days in {city['city_name']}")
+    st.markdown(translate_ui("custom_itinerary").format(days=num_days, city=city['city_name']))
 
     # Hotel recommendation
     hotel_suggestion = hotels.get(budget_key, {"name": "Local Stay", "desc": "Conveniently located accommodation.", "price": ""})
-    st.info(f"🏨 **Recommended Stay ({budget_tier.split(' ')[0]}):** **{hotel_suggestion['name']}**\n\n*{hotel_suggestion['desc']}* (Est: {hotel_suggestion.get('price', '')})")
+    rec_stay_lbl = translate_ui("recommended_stay_label").format(tier=budget_tier_display)
+    st.info(f"🏨 **{rec_stay_lbl}** **{hotel_suggestion['name']}**\n\n*{hotel_suggestion['desc']}* (Est: {hotel_suggestion.get('price', '')})")
     st.write("")
 
     # Distribute elements dynamically
     for day in range(1, num_days + 1):
+        day_hdr = translate_ui("day_title").format(day=day)
         render_html(f"""
             <div class="timeline-day">
-                <h4 style="color: var(--primary-color); margin-top:0;">📅 Day {day} - Exploring the Heart of the City</h4>
+                <h4 style="color: var(--primary-color); margin-top:0;">{day_hdr}</h4>
             </div>
         """)
 
@@ -150,41 +171,53 @@ with col_plan:
 
         # Details
         if morning_att:
-            st.markdown(f"**☀️ Morning: Visit {morning_att['name']}**")
+            morn_lbl = translate_ui("morning_activity").format(name=morning_att['name'])
+            st.markdown(f"**{morn_lbl}**")
             st.caption(f"{morning_att['desc']} (Rating: {morning_att.get('rating', '4.5')})")
 
         if food_opt:
-            st.markdown(f"**😋 Lunch: Try local {food_opt['name']}**")
+            lunch_lbl = translate_ui("lunch_activity").format(name=food_opt['name'])
+            st.markdown(f"**{lunch_lbl}**")
             st.caption(f"{food_opt['desc']}")
 
         if afternoon_att:
-            st.markdown(f"**⛅ Afternoon: Tour {afternoon_att['name']}**")
+            aft_lbl = translate_ui("afternoon_activity").format(name=afternoon_att['name'])
+            st.markdown(f"**{aft_lbl}**")
             st.caption(f"{afternoon_att['desc']} (Rating: {afternoon_att.get('rating', '4.5')})")
 
         if shop_opt:
-            st.markdown(f"**🛍️ Evening: Shop at {shop_opt['name']}**")
+            eve_lbl = translate_ui("evening_shop").format(name=shop_opt['name'])
+            st.markdown(f"**{eve_lbl}**")
             st.caption(f"{shop_opt['desc']}")
         else:
-            st.markdown("**🌆 Evening: Free exploration and dining**")
-            st.caption("Walk through local streets, discover street food stalls, and interact with the local culture.")
+            st.markdown(f"**{translate_ui('evening_free')}**")
+            st.caption(translate_ui("evening_free_desc"))
 
         st.divider()
 
 with col_budget:
-    st.markdown("### 💰 Estimated Budget Breakdown")
+    st.markdown(translate_ui("estimated_budget_breakdown"))
 
     # Display Key Metrics
+    total_est_exp = translate_ui("total_estimated_expenses")
+    details_lbl = translate_ui("for_days_tier").format(days=num_days, tier=budget_tier_display)
     render_html(f"""
         <div style="background-color: var(--secondary-background-color); border: 2px solid var(--primary-color); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 25px;">
-            <div style="font-size: 0.9rem; color: gray; text-transform: uppercase;">Total Estimated Expenses</div>
+            <div style="font-size: 0.9rem; color: gray; text-transform: uppercase;">{total_est_exp}</div>
             <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary-color);">{currency_symbol} {total_budget:,} {currency_code}</div>
-            <div style="font-size: 0.85rem; color: gray; margin-top:5px;">For {num_days} days &bull; {budget_tier.split(' ')[0]} tier</div>
+            <div style="font-size: 0.85rem; color: gray; margin-top:5px;">{details_lbl}</div>
         </div>
     """)
 
     # Dataframe for table and chart
     budget_data = {
-        "Expense Category": ["🏨 Accommodation", "🍜 Food & Dining", "🚌 Transport", "🎟️ Sightseeing", "🎁 Shopping/Misc"],
+        "Expense Category": [
+            translate_ui("category_accommodation"),
+            translate_ui("category_food"),
+            translate_ui("category_transport"),
+            translate_ui("category_sightseeing"),
+            translate_ui("category_shopping")
+        ],
         "Amount": [accommodation_cost, food_cost, transport_cost, sightseeing_cost, shopping_cost]
     }
     df_budget = pd.DataFrame(budget_data)
@@ -207,13 +240,13 @@ with col_budget:
     st.plotly_chart(fig, use_container_width=True)
 
     # Cost Table
-    st.markdown("##### Detailed Allocation Table")
+    st.markdown(translate_ui("detailed_allocation_table"))
     formatted_df = df_budget.copy()
     formatted_df["Amount"] = formatted_df["Amount"].apply(lambda x: f"{currency_symbol} {x:,} {currency_code}")
     st.table(formatted_df)
 
     # Local Transit & Safety Warning Card
-    st.markdown("### ℹ️ Important Travel Tips")
+    st.markdown(translate_ui("important_travel_tips"))
     with st.container(border=True):
-        st.markdown(f"**✈️ Airport Transfer:** {city['airport_details']}")
-        st.markdown(f"**🚇 City Transit:** {city['transport_info']}")
+        st.markdown(f"**{translate_ui('airport_transfer_label')}** {city['airport_details']}")
+        st.markdown(f"**{translate_ui('city_transit_label')}** {city['transport_info']}")

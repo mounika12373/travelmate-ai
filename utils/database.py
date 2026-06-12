@@ -75,7 +75,8 @@ def get_all_countries():
     cursor.execute("SELECT * FROM countries ORDER BY country_name ASC;")
     rows = cursor.fetchall()
     conn.close()
-    return [dict(row) for row in rows]
+    from utils.i18n import translate_db_record
+    return [translate_db_record(dict(row), "country") for row in rows]
 
 def get_cities_by_country(country_id):
     """Fetches all cities for a specific country."""
@@ -84,7 +85,8 @@ def get_cities_by_country(country_id):
     cursor.execute("SELECT * FROM cities WHERE country_id = ? ORDER BY city_name ASC;", (country_id,))
     rows = cursor.fetchall()
     conn.close()
-    return [dict(row) for row in rows]
+    from utils.i18n import translate_db_record
+    return [translate_db_record(dict(row), "city") for row in rows]
 
 def get_country_details(country_id):
     """Fetches details of a specific country by ID."""
@@ -93,16 +95,23 @@ def get_country_details(country_id):
     cursor.execute("SELECT * FROM countries WHERE id = ?;", (country_id,))
     row = cursor.fetchone()
     conn.close()
-    return dict(row) if row else None
+    if row:
+        from utils.i18n import translate_db_record
+        return translate_db_record(dict(row), "country")
+    return None
 
 def get_country_by_name(country_name):
     """Fetches details of a country by name (case-insensitive)."""
+    from utils.i18n import get_english_term, translate_db_record
+    eng_name = get_english_term(country_name)
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM countries WHERE LOWER(country_name) = LOWER(?);", (country_name.strip(),))
+    cursor.execute("SELECT * FROM countries WHERE LOWER(country_name) = LOWER(?);", (eng_name.strip(),))
     row = cursor.fetchone()
     conn.close()
-    return dict(row) if row else None
+    if row:
+        return translate_db_record(dict(row), "country")
+    return None
 
 def get_city_details(city_id):
     """Fetches details of a specific city by ID."""
@@ -111,16 +120,23 @@ def get_city_details(city_id):
     cursor.execute("SELECT * FROM cities WHERE id = ?;", (city_id,))
     row = cursor.fetchone()
     conn.close()
-    return dict(row) if row else None
+    if row:
+        from utils.i18n import translate_db_record
+        return translate_db_record(dict(row), "city")
+    return None
 
 def get_city_by_name(city_name):
     """Fetches details of a city by name (case-insensitive)."""
+    from utils.i18n import get_english_term, translate_db_record
+    eng_name = get_english_term(city_name)
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM cities WHERE LOWER(city_name) = LOWER(?);", (city_name.strip(),))
+    cursor.execute("SELECT * FROM cities WHERE LOWER(city_name) = LOWER(?);", (eng_name.strip(),))
     row = cursor.fetchone()
     conn.close()
-    return dict(row) if row else None
+    if row:
+        return translate_db_record(dict(row), "city")
+    return None
 
 def search_locations(query):
     """
@@ -130,7 +146,9 @@ def search_locations(query):
     if not query or not query.strip():
         return {"countries": [], "cities": []}
 
-    q = f"%{query.strip()}%"
+    from utils.i18n import get_english_term, translate_db_record
+    eng_query = get_english_term(query)
+    q = f"%{eng_query.strip()}%"
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -139,7 +157,7 @@ def search_locations(query):
         SELECT * FROM countries 
         WHERE country_name LIKE ? OR capital LIKE ? OR language LIKE ?;
     """, (q, q, q))
-    countries = [dict(row) for row in cursor.fetchall()]
+    countries = [translate_db_record(dict(row), "country") for row in cursor.fetchall()]
 
     # Search cities
     cursor.execute("""
@@ -148,7 +166,7 @@ def search_locations(query):
         JOIN countries ON cities.country_id = countries.id
         WHERE city_name LIKE ? OR description LIKE ? OR tourist_places LIKE ?;
     """, (q, q, q))
-    cities = [dict(row) for row in cursor.fetchall()]
+    cities = [translate_db_record(dict(row), "city") for row in cursor.fetchall()]
 
     conn.close()
     return {"countries": countries, "cities": cities}
