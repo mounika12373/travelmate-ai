@@ -1,17 +1,8 @@
 image: python:3.11-slim
 
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  PYTHONPATH: "$CI_PROJECT_DIR"
-
-cache:
-  paths:
-    - .cache/pip
-    - .venv/
-
 stages:
-  - lint
   - format
+  - lint
   - type_check
   - test
   - coverage
@@ -54,6 +45,12 @@ ruff_lint:
   script:
     - pip install ruff
     - ruff check .
+    - bandit -r .
+
+type_check:
+  stage: type_check
+  script:
+    - mypy .
 
 # --- FORMAT STAGE ---
 
