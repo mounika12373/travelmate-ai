@@ -38,3 +38,16 @@ python_files = ["test_*.py"]
 
 [tool.setuptools]
 packages = []
+
+[dependency-groups]
+dev = [
+    "bandit>=1.8.6",
+    "flake8>=7.3.0",
+    "mypy>=1.19.1",
+    "pre-commit>=4.3.0",
+    "pylint>=3.3.9",
+    "pytest-cov>=7.1.0",
+    "pyupgrade>=3.21.0",
+    "semgrep>=1.136.0",
+    "vulture>=2.16",
+]
