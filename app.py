@@ -14,10 +14,7 @@ init_db()
 
 # Page configuration
 st.set_page_config(
-    page_title="TravelMate AI – Smart Travel Companion",
-    page_icon="✈️",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    page_title="TravelMate AI – Smart Travel Companion", page_icon="✈️", layout="wide", initial_sidebar_state="expanded"
 )
 
 # Inject custom global styling
@@ -138,8 +135,11 @@ pg = st.navigation(nav_dict)
 pg.run()
 
 # Custom Sidebar Footer
-render_html(f"""
-    <div style='position: fixed; bottom: 10px; width: 100%; text-align: left; padding: 10px; font-size:0.8rem; color:gray;'>
+render_html(
+    f"""
+    <div style='position: fixed; bottom: 10px; width: 100%; text-align: left; padding-left: 10px;'>
         {translate_ui("made_with_love")}
     </div>
-""", sidebar=True)
+""",
+    sidebar=True,
+)

@@ -7,6 +7,7 @@ from utils.styles import render_hero, render_image_card
 # Page Title inside sidebar context (optional, since router does it, but we can set content)
 render_hero(
     "TravelMate AI",
+<<<<<<< HEAD
     translate_ui("home_hero_subtitle"),
     image_path="assets/travelmate_banner.png"
 )
@@ -17,6 +18,16 @@ search_input = st.text_input(
     translate_ui("search_placeholder"),
     value="",
     placeholder=translate_ui("search_placeholder")
+=======
+    "Discover essential local laws, cultural etiquette, transit guides, top foods, and safety advice before you arrive.",
+    image_path="assets/travelmate_banner.png",
+)
+
+# 1. Quick Search Section
+st.subheader("🔍 Quick Search")
+search_input = st.text_input(
+    "Search for a country or city...", value="", placeholder="e.g., Tokyo, India, Biryani, temples..."
+>>>>>>> be75e90 (Fix compliance checks and tooling)
 )
 
 if search_input:
@@ -106,10 +117,14 @@ else:
 
     with sel_col1:
         selected_country_name = st.selectbox(
+<<<<<<< HEAD
             translate_ui("select_country"),
             country_names,
             index=selected_c_index if selected_c_index < len(country_names) else 0,
             key="country_select"
+=======
+            "Select Country", country_names, index=selected_c_index, key="country_select"
+>>>>>>> be75e90 (Fix compliance checks and tooling)
         )
         # Find matching country object
         selected_country = next(c for c in countries if c["country_name"] == selected_country_name)
@@ -117,9 +132,15 @@ else:
 
         # Display short summary
         st.markdown(f"""
+<<<<<<< HEAD
         **{translate_ui('capital_label')}:** {selected_country['capital']}  
         **{translate_ui('currency_label')}:** {selected_country['currency']}  
         **{translate_ui('language_label')}:** {selected_country['language']}  
+=======
+        **Capital:** {selected_country["capital"]}  
+        **Currency:** {selected_country["currency"]}  
+        **Language:** {selected_country["language"]}  
+>>>>>>> be75e90 (Fix compliance checks and tooling)
         """)
         if st.session_state.get("user"):
             from utils.database import save_trip, get_saved_trips
@@ -151,14 +172,19 @@ else:
                 translate_ui("select_city"),
                 city_names,
                 index=selected_ct_index if selected_ct_index < len(city_names) else 0,
-                key="city_select"
+                key="city_select",
             )
             selected_city = next(ct for ct in cities if ct["city_name"] == selected_city_name)
             st.session_state.selected_city_id = selected_city["id"]
 
             st.markdown(f"""
+<<<<<<< HEAD
             **{translate_ui('description') if 'description' in selected_city else 'Description'}:**  
             {selected_city['description'][:140]}...
+=======
+            **Description:**  
+            {selected_city["description"][:140]}...
+>>>>>>> be75e90 (Fix compliance checks and tooling)
             """)
             if st.session_state.get("user"):
                 from utils.database import save_trip, get_saved_trips
@@ -188,13 +214,17 @@ with col_trend1:
         title=translate_ui("trend_tokyo_title"),
         content=translate_ui("trend_tokyo_desc"),
         image_path="assets/tokyo_city.png",
+<<<<<<< HEAD
         badges=["4.9 ⭐", translate_ui("most_popular")]
+=======
+        badges=["4.9 ⭐", "Most Popular"],
+>>>>>>> be75e90 (Fix compliance checks and tooling)
     )
     btn_label = translate_ui("explore_tokyo")
     if st.button(btn_label, key="trend_tokyo", use_container_width=True):
         tokyo_city = next((ct for c in get_cities_by_country(2) if ct["city_name"].lower() in ["tokyo", "टोक्यो", "టోక్యో"]), None)
         if tokyo_city:
-            st.session_state.selected_country_id = 2 # Japan ID is 2
+            st.session_state.selected_country_id = 2  # Japan ID is 2
             st.session_state.selected_city_id = tokyo_city["id"]
             st.switch_page("pages/city_info.py")
 
@@ -203,13 +233,17 @@ with col_trend2:
         title=translate_ui("trend_hyd_title"),
         content=translate_ui("trend_hyd_desc"),
         image_path="assets/hyderabad_city.png",
+<<<<<<< HEAD
         badges=["4.7 ⭐", translate_ui("cultural_choice")]
+=======
+        badges=["4.7 ⭐", "Cultural Choice"],
+>>>>>>> be75e90 (Fix compliance checks and tooling)
     )
     btn_label = translate_ui("explore_hyderabad")
     if st.button(btn_label, key="trend_hyd", use_container_width=True):
         hyd_city = next((ct for ct in get_cities_by_country(1) if ct["city_name"].lower() in ["hyderabad", "हैदराबाद", "హైదరాబాద్"]), None)
         if hyd_city:
-            st.session_state.selected_country_id = 1 # India ID is 1
+            st.session_state.selected_country_id = 1  # India ID is 1
             st.session_state.selected_city_id = hyd_city["id"]
             st.switch_page("pages/city_info.py")
 
@@ -218,12 +252,16 @@ with col_trend3:
         title=translate_ui("trend_sg_title"),
         content=translate_ui("trend_sg_desc"),
         image_path="assets/singapore_city.png",
+<<<<<<< HEAD
         badges=["4.8 ⭐", translate_ui("safest_destination")]
+=======
+        badges=["4.8 ⭐", "Safest Destination"],
+>>>>>>> be75e90 (Fix compliance checks and tooling)
     )
     btn_label = translate_ui("explore_singapore")
     if st.button(btn_label, key="trend_sg", use_container_width=True):
         sg_city = next((ct for c in get_cities_by_country(3) if ct["city_name"].lower() in ["singapore city", "downtown core", "डाउनटाउन कोर", "డౌన్‌టౌన్ కోర్"]), None)
         if sg_city:
-            st.session_state.selected_country_id = 3 # Singapore ID is 3
+            st.session_state.selected_country_id = 3  # Singapore ID is 3
             st.session_state.selected_city_id = sg_city["id"]
             st.switch_page("pages/city_info.py")

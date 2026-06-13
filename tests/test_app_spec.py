@@ -8,8 +8,10 @@ class MockSessionState(dict):
             return self[name]
         except KeyError:
             raise AttributeError(name)
+
     def __setattr__(self, name, value):
         self[name] = value
+
 
 def describe_app_router():
     def it_initializes_session_state_and_configures_navigation(monkeypatch):

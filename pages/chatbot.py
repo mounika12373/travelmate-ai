@@ -189,7 +189,7 @@ with sug_col3:
 user_prompt = None
 if "prompt_trigger" in st.session_state and st.session_state.prompt_trigger:
     user_prompt = st.session_state.prompt_trigger
-    st.session_state.prompt_trigger = None # Reset trigger
+    st.session_state.prompt_trigger = None  # Reset trigger
 else:
     # Get user input from chat input box
     user_prompt = st.chat_input(translate_ui("chat_placeholder"))
@@ -243,7 +243,7 @@ if user_prompt:
         # Simulate stream typing
         for chunk in response.split(" "):
             full_response += chunk + " "
-            time.sleep(0.04) # brief delay
+            time.sleep(0.04)  # brief delay
             message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
 
