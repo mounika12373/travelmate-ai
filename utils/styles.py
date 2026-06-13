@@ -1,4 +1,3 @@
-
 import streamlit as st
 
 
@@ -8,6 +7,7 @@ def render_html(html_str, sidebar=False):
     cleaned = "".join([line.strip() for line in html_str.split("\n")])
     target = st.sidebar if sidebar else st
     target.markdown(cleaned, unsafe_allow_html=True)
+
 
 def inject_global_css():
     """Injects custom global CSS into the Streamlit app to ensure a premium UI/UX."""
@@ -158,6 +158,7 @@ def inject_global_css():
         </style>
     """)
 
+
 import base64
 
 
@@ -169,6 +170,7 @@ def get_image_base64(image_path):
             return f"data:image/png;base64,{encoded}"
     except Exception:
         return ""
+
 
 def render_hero(title, subtitle, image_path=None):
     """Renders a beautiful hero header, optionally with a background image."""
@@ -185,6 +187,7 @@ def render_hero(title, subtitle, image_path=None):
         </div>
     """)
 
+
 def render_image_card(title, content, image_path, badges=None, height="260px"):
     """Helper to render a styled HTML card with a background image and text overlay."""
     base64_img = get_image_base64(image_path)
@@ -197,7 +200,11 @@ def render_image_card(title, content, image_path, badges=None, height="260px"):
         else:
             badge_html = f'<span class="rating-badge">{badges}</span>'
 
-    bg_style = f"background-image: linear-gradient(180deg, rgba(0,0,0,0.1), rgba(11, 19, 43, 0.9)), url('{base64_img}');" if base64_img else "background: var(--secondary-background-color);"
+    bg_style = (
+        f"background-image: linear-gradient(180deg, rgba(0,0,0,0.1), rgba(11, 19, 43, 0.9)), url('{base64_img}');"
+        if base64_img
+        else "background: var(--secondary-background-color);"
+    )
 
     render_html(f"""
         <div class="travel-card" style="{bg_style} background-size: cover; background-position: center; min-height: {height}; display: flex; flex-direction: column; justify-content: flex-end; color: white !important;">
@@ -210,6 +217,7 @@ def render_image_card(title, content, image_path, badges=None, height="260px"):
             </div>
         </div>
     """)
+
 
 def render_card(title, content, badges=None, price_badge=None, extra_html=""):
     """Helper to render a styled HTML card."""
@@ -238,4 +246,3 @@ def render_card(title, content, badges=None, price_badge=None, extra_html=""):
             {extra_html}
         </div>
     """)
-

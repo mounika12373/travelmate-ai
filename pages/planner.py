@@ -8,8 +8,15 @@ from utils.database import get_all_countries, get_cities_by_country, get_city_de
 from utils.i18n import translate_ui
 from utils.styles import render_hero, render_html
 
+<<<<<<< HEAD
 # Render localized hero
 render_hero(translate_ui("smart_planner_title"), translate_ui("smart_planner_subtitle"))
+=======
+render_hero(
+    "📅 Smart Travel Planner",
+    "Plan your custom itinerary, calculate your budget breakdown, and view customized hotel recommendations.",
+)
+>>>>>>> be75e90 (Fix compliance checks and tooling)
 
 # Load destinations list
 countries = get_all_countries()
@@ -17,12 +24,9 @@ all_cities = []
 for c in countries:
     cities = get_cities_by_country(c["id"])
     for ct in cities:
-        all_cities.append({
-            "id": ct["id"],
-            "city_name": ct["city_name"],
-            "country_name": c["country_name"],
-            "country_id": c["id"]
-        })
+        all_cities.append(
+            {"id": ct["id"], "city_name": ct["city_name"], "country_name": c["country_name"], "country_id": c["id"]}
+        )
 
 if not all_cities:
     st.error(translate_ui("no_cities_warning"))
@@ -52,8 +56,12 @@ with col_in3:
     luxury_label = translate_ui("budget_luxury")
     
     budget_tier = st.selectbox(
+<<<<<<< HEAD
         translate_ui("choose_budget_tier"),
         [economy_label, mid_range_label, luxury_label]
+=======
+        "Choose Budget Tier", ["Economy (Cost-Effective)", "Mid-Range (Balanced)", "Luxury (Premium Experience)"]
+>>>>>>> be75e90 (Fix compliance checks and tooling)
     )
     # Simplify budget string key
     if budget_tier == economy_label:
@@ -92,7 +100,7 @@ except Exception:
 # Dynamic Budget calculations
 currency_symbol = "S$"
 currency_code = "SGD"
-base_daily_rates = {} # Rates in local currency
+base_daily_rates = {}  # Rates in local currency
 
 # Note: country name might be returned translated! Check orig name or check both
 c_name_lower = country["country_name"].lower()
@@ -105,21 +113,51 @@ if is_india:
     if budget_key == "budget":
         base_daily_rates = {"accommodation": 3000, "food": 1000, "transport": 400, "sightseeing": 500, "shopping": 600}
     elif budget_key == "mid_range":
-        base_daily_rates = {"accommodation": 7500, "food": 2500, "transport": 1200, "sightseeing": 1500, "shopping": 2000}
+        base_daily_rates = {
+            "accommodation": 7500,
+            "food": 2500,
+            "transport": 1200,
+            "sightseeing": 1500,
+            "shopping": 2000,
+        }
     else:
-        base_daily_rates = {"accommodation": 25000, "food": 6000, "transport": 4000, "sightseeing": 4000, "shopping": 8000}
+        base_daily_rates = {
+            "accommodation": 25000,
+            "food": 6000,
+            "transport": 4000,
+            "sightseeing": 4000,
+            "shopping": 8000,
+        }
 
 elif is_japan:
     currency_symbol = "¥"
     currency_code = "JPY"
     if budget_key == "budget":
-        base_daily_rates = {"accommodation": 6500, "food": 3000, "transport": 1000, "sightseeing": 1500, "shopping": 1500}
+        base_daily_rates = {
+            "accommodation": 6500,
+            "food": 3000,
+            "transport": 1000,
+            "sightseeing": 1500,
+            "shopping": 1500,
+        }
     elif budget_key == "mid_range":
-        base_daily_rates = {"accommodation": 22000, "food": 8000, "transport": 2500, "sightseeing": 4000, "shopping": 5000}
+        base_daily_rates = {
+            "accommodation": 22000,
+            "food": 8000,
+            "transport": 2500,
+            "sightseeing": 4000,
+            "shopping": 5000,
+        }
     else:
-        base_daily_rates = {"accommodation": 80000, "food": 20000, "transport": 10000, "sightseeing": 12000, "shopping": 15000}
+        base_daily_rates = {
+            "accommodation": 80000,
+            "food": 20000,
+            "transport": 10000,
+            "sightseeing": 12000,
+            "shopping": 15000,
+        }
 
-else: # Singapore
+else:  # Singapore
     currency_symbol = "S$"
     currency_code = "SGD"
     if budget_key == "budget":
@@ -145,9 +183,18 @@ with col_plan:
     st.markdown(translate_ui("custom_itinerary").format(days=num_days, city=city['city_name']))
 
     # Hotel recommendation
+<<<<<<< HEAD
     hotel_suggestion = hotels.get(budget_key, {"name": "Local Stay", "desc": "Conveniently located accommodation.", "price": ""})
     rec_stay_lbl = translate_ui("recommended_stay_label").format(tier=budget_tier_display)
     st.info(f"🏨 **{rec_stay_lbl}** **{hotel_suggestion['name']}**\n\n*{hotel_suggestion['desc']}* (Est: {hotel_suggestion.get('price', '')})")
+=======
+    hotel_suggestion = hotels.get(
+        budget_key, {"name": "Local Stay", "desc": "Conveniently located accommodation.", "price": ""}
+    )
+    st.info(
+        f"🏨 **Recommended Stay ({budget_tier.split(' ')[0]}):** **{hotel_suggestion['name']}**\n\n*{hotel_suggestion['desc']}* (Est: {hotel_suggestion.get('price', '')})"
+    )
+>>>>>>> be75e90 (Fix compliance checks and tooling)
     st.write("")
 
     # Distribute elements dynamically
@@ -160,7 +207,7 @@ with col_plan:
         """)
 
         # Determine morning/afternoon attractions based on index
-        attract_indices = [(day*2 - 2) % len(attractions), (day*2 - 1) % len(attractions)] if attractions else []
+        attract_indices = [(day * 2 - 2) % len(attractions), (day * 2 - 1) % len(attractions)] if attractions else []
         morning_att = attractions[attract_indices[0]] if len(attract_indices) > 0 and attractions else None
         afternoon_att = attractions[attract_indices[1]] if len(attract_indices) > 1 and attractions else None
 
@@ -205,13 +252,18 @@ with col_budget:
         <div style="background-color: var(--secondary-background-color); border: 2px solid var(--primary-color); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 25px;">
             <div style="font-size: 0.9rem; color: gray; text-transform: uppercase;">{total_est_exp}</div>
             <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary-color);">{currency_symbol} {total_budget:,} {currency_code}</div>
+<<<<<<< HEAD
             <div style="font-size: 0.85rem; color: gray; margin-top:5px;">{details_lbl}</div>
+=======
+            <div style="font-size: 0.85rem; color: gray; margin-top:5px;">For {num_days} days &bull; {budget_tier.split(" ")[0]} tier</div>
+>>>>>>> be75e90 (Fix compliance checks and tooling)
         </div>
     """)
 
     # Dataframe for table and chart
     budget_data = {
         "Expense Category": [
+<<<<<<< HEAD
             translate_ui("category_accommodation"),
             translate_ui("category_food"),
             translate_ui("category_transport"),
@@ -219,6 +271,15 @@ with col_budget:
             translate_ui("category_shopping")
         ],
         "Amount": [accommodation_cost, food_cost, transport_cost, sightseeing_cost, shopping_cost]
+=======
+            "🏨 Accommodation",
+            "🍜 Food & Dining",
+            "🚌 Transport",
+            "🎟️ Sightseeing",
+            "🎁 Shopping/Misc",
+        ],
+        "Amount": [accommodation_cost, food_cost, transport_cost, sightseeing_cost, shopping_cost],
+>>>>>>> be75e90 (Fix compliance checks and tooling)
     }
     df_budget = pd.DataFrame(budget_data)
 
@@ -228,13 +289,13 @@ with col_budget:
         values="Amount",
         names="Expense Category",
         color_discrete_sequence=px.colors.qualitative.Pastel,
-        hole=0.4
+        hole=0.4,
     )
     fig.update_layout(
         margin=dict(t=0, b=0, l=0, r=0),
         legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5),
         paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)"
+        plot_bgcolor="rgba(0,0,0,0)",
     )
 
     st.plotly_chart(fig, use_container_width=True)

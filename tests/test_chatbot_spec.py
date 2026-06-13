@@ -10,6 +10,7 @@ def setup_temp_db(monkeypatch, tmp_path):
     db.init_db()
     return db
 
+
 def describe_chatbot_response():
     def it_handles_greeting_fallback_when_no_match(monkeypatch, tmp_path):
         setup_temp_db(monkeypatch, tmp_path)

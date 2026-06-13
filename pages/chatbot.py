@@ -12,7 +12,15 @@ from utils.database import (
 from utils.i18n import get_english_term, translate_ui
 from utils.styles import render_hero
 
+<<<<<<< HEAD
 render_hero(translate_ui("ai_chatbot_title"), translate_ui("ai_chatbot_subtitle"))
+=======
+render_hero(
+    "💬 AI Travel Assistant",
+    "Ask questions about local rules, etiquette, food, attractions, and safety tips. Answers are based on our travel database.",
+)
+
+>>>>>>> be75e90 (Fix compliance checks and tooling)
 
 # Helper function to match keywords and generate context-rich answers
 def generate_bot_response(user_query, active_country_id, active_city_id):
@@ -51,12 +59,49 @@ def generate_bot_response(user_query, active_country_id, active_city_id):
     if target_city and not target_country:
         target_country = get_country_details(target_city["country_id"])
 
+<<<<<<< HEAD
     # Topic detection (on English normalized query)
     is_food = any(w in query for w in ["food", "eat", "try", "dish", "cuisine", "delicacies", "dining", "lunch", "dinner", "biryani", "sushi", "crab", "ramen"])
     is_rules = any(w in query for w in ["rule", "law", "traffic", "regulation", "fine", "forbidden", "prohibit", "chewing gum", "smoking"])
     is_etiquette = any(w in query for w in ["etiquette", "culture", "do", "don't", "respect", "bow", "tip", "shoe", "hand", "custom"])
     is_safety = any(w in query for w in ["safety", "safe", "scam", "crime", "emergency", "police", "ambulance", "water", "drinkable"])
     is_attraction = any(w in query for w in ["places", "attractions", "visit", "see", "sightseeing", "temple", "shrine", "monument", "tour"])
+=======
+    # Topic detection
+    is_food = any(
+        w in query
+        for w in [
+            "food",
+            "eat",
+            "try",
+            "dish",
+            "cuisine",
+            "delicacies",
+            "dining",
+            "lunch",
+            "dinner",
+            "biryani",
+            "sushi",
+            "crab",
+            "ramen",
+        ]
+    )
+    is_rules = any(
+        w in query
+        for w in ["rule", "law", "traffic", "regulation", "fine", "forbidden", "prohibit", "chewing gum", "smoking"]
+    )
+    is_etiquette = any(
+        w in query for w in ["etiquette", "culture", "do", "don't", "respect", "bow", "tip", "shoe", "hand", "custom"]
+    )
+    is_safety = any(
+        w in query
+        for w in ["safety", "safe", "scam", "crime", "emergency", "police", "ambulance", "water", "drinkable"]
+    )
+    is_attraction = any(
+        w in query
+        for w in ["places", "attractions", "visit", "see", "sightseeing", "temple", "shrine", "monument", "tour"]
+    )
+>>>>>>> be75e90 (Fix compliance checks and tooling)
     is_hotel = any(w in query for w in ["hotel", "stay", "accommodation", "resort", "hostel"])
     is_transport = any(w in query for w in ["transport", "bus", "metro", "subway", "train", "taxi", "airport"])
     is_visa = any(w in query for w in ["visa", "entry", "passport", "arrival"])
@@ -77,8 +122,18 @@ def generate_bot_response(user_query, active_country_id, active_city_id):
         elif is_attraction:
             try:
                 places = json.loads(target_city["tourist_places"])
+<<<<<<< HEAD
                 place_list = "\n".join([f"- **{p['name']}** ({p.get('rating', '4.5')}) - {p['desc']} Best visited in the *{p.get('time', 'day')}*." for p in places])
                 return translate_ui("bot_attract_city").format(city=city_name, list=place_list)
+=======
+                place_list = "\n".join(
+                    [
+                        f"- **{p['name']}** ({p.get('rating', '4.5')}) - {p['desc']} Best visited in the *{p.get('time', 'day')}*."
+                        for p in places
+                    ]
+                )
+                return f"🎡 **Top tourist attractions in {city_name}:**\n\n{place_list}"
+>>>>>>> be75e90 (Fix compliance checks and tooling)
             except Exception:
                 return f"🎡 Stored attractions for {city_name}: {target_city['tourist_places']}"
 
@@ -87,8 +142,15 @@ def generate_bot_response(user_query, active_country_id, active_city_id):
                 hotels = json.loads(target_city["hotel_info"])
                 hotel_list = ""
                 for tier, details in hotels.items():
+<<<<<<< HEAD
                     hotel_list += f"- **{tier.upper()}**: {details['name']} ({details.get('price', '')}) - *{details['desc']}*\n"
                 return translate_ui("bot_hotel_city").format(city=city_name, list=hotel_list)
+=======
+                    hotel_list += (
+                        f"- **{tier.upper()}**: {details['name']} ({details.get('price', '')}) - *{details['desc']}*\n"
+                    )
+                return f"🏨 **Recommended stays in {city_name}:**\n\n{hotel_list}"
+>>>>>>> be75e90 (Fix compliance checks and tooling)
             except Exception:
                 return f"🏨 Stored hotels for {city_name}: {target_city['hotel_info']}"
 
@@ -144,7 +206,14 @@ if "chat_language" not in st.session_state:
 
 if "messages" not in st.session_state or st.session_state.chat_language != st.session_state.get("language", "en"):
     st.session_state.messages = [
+<<<<<<< HEAD
         {"role": "assistant", "content": translate_ui("chat_bot_welcome")}
+=======
+        {
+            "role": "assistant",
+            "content": "Hello! I am your TravelMate AI Assistant. Ask me anything about local rules, etiquette, food, and stays for India, Japan, or Singapore.",
+        }
+>>>>>>> be75e90 (Fix compliance checks and tooling)
     ]
     st.session_state.chat_language = st.session_state.get("language", "en")
 
@@ -166,7 +235,7 @@ with sug_col3:
 user_prompt = None
 if "prompt_trigger" in st.session_state and st.session_state.prompt_trigger:
     user_prompt = st.session_state.prompt_trigger
-    st.session_state.prompt_trigger = None # Reset trigger
+    st.session_state.prompt_trigger = None  # Reset trigger
 else:
     # Get user input from chat input box
     user_prompt = st.chat_input(translate_ui("chat_placeholder"))
@@ -185,9 +254,7 @@ if user_prompt:
 
     # Generate response
     response = generate_bot_response(
-        user_prompt,
-        st.session_state.get("selected_country_id"),
-        st.session_state.get("selected_city_id")
+        user_prompt, st.session_state.get("selected_country_id"), st.session_state.get("selected_city_id")
     )
 
     # Display assistant response with a simulated typing speed
@@ -197,7 +264,7 @@ if user_prompt:
         # Simulate stream typing
         for chunk in response.split(" "):
             full_response += chunk + " "
-            time.sleep(0.04) # brief delay
+            time.sleep(0.04)  # brief delay
             message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
 

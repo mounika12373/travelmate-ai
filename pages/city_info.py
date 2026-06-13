@@ -11,6 +11,7 @@ def make_maps_link(item_name, city_name):
     query = f"{item_name} {city_name}".replace(" ", "+")
     return f"<a href='https://www.google.com/maps/search/?api=1&query={query}' target='_blank' style='text-decoration:none; color:var(--primary-color); font-weight:600; font-size:0.88rem; display:inline-block; margin-top:5px;'>🗺️ Location & Directions ↗</a>"
 
+
 # Sidebar selectors for quick context changing
 countries = get_all_countries()
 if not countries:
@@ -28,10 +29,14 @@ if st.session_state.selected_country_id:
 
 st.sidebar.subheader(translate_ui("select_destination"))
 selected_country_name = st.sidebar.selectbox(
+<<<<<<< HEAD
     translate_ui("country_label"),
     country_names,
     index=current_c_index if current_c_index < len(country_names) else 0,
     key="city_info_country_select"
+=======
+    "Country", country_names, index=current_c_index, key="city_info_country_select"
+>>>>>>> be75e90 (Fix compliance checks and tooling)
 )
 selected_country = next(c for c in countries if c["country_name"] == selected_country_name)
 st.session_state.selected_country_id = selected_country["id"]
@@ -51,10 +56,14 @@ if st.session_state.selected_city_id:
             break
 
 selected_city_name = st.sidebar.selectbox(
+<<<<<<< HEAD
     translate_ui("city_label"),
     city_names,
     index=current_ct_index if current_ct_index < len(city_names) else 0,
     key="city_info_city_select"
+=======
+    "City", city_names, index=current_ct_index if current_ct_index < len(city_names) else 0, key="city_info_city_select"
+>>>>>>> be75e90 (Fix compliance checks and tooling)
 )
 selected_city = next(ct for ct in cities if ct["city_name"] == selected_city_name)
 st.session_state.selected_city_id = selected_city["id"]
@@ -66,12 +75,18 @@ city = get_city_details(st.session_state.selected_city_id)
 render_hero(city["city_name"], city["description"])
 
 # City details layout
+<<<<<<< HEAD
 tab_attract, tab_food, tab_hotel, tab_transit = st.tabs([
     translate_ui("attractions_tab"),
     translate_ui("food_tab"),
     translate_ui("stays_tab"),
     translate_ui("transit_tab")
 ])
+=======
+tab_attract, tab_food, tab_hotel, tab_transit = st.tabs(
+    ["🎡 Attractions & Shopping", "🍲 Local Delicacies", "🏨 Recommended Stays", "🚌 Transit & Airport Guide"]
+)
+>>>>>>> be75e90 (Fix compliance checks and tooling)
 
 # 1. Attractions & Shopping
 with tab_attract:
@@ -85,14 +100,14 @@ with tab_attract:
             col = cols[idx % 2]
             with col:
                 badge_text = f"⭐ {place.get('rating', '4.5')}"
-                if 'time' in place:
+                if "time" in place:
                     badge_text += f" | ⏰ {place['time']}"
 
                 render_card(
                     title=f"📍 {place['name']}",
                     content=place["desc"],
                     badges=badge_text,
-                    extra_html=make_maps_link(place['name'], city['city_name'])
+                    extra_html=make_maps_link(place["name"], city["city_name"]),
                 )
     except Exception:
         st.error("Error loading tourist places.")
@@ -111,9 +126,15 @@ with tab_attract:
             with col:
                 render_card(
                     title=f"🛍️ {shop['name']}",
+<<<<<<< HEAD
                     content=shop['desc'],
                     badges=translate_ui("shopping_area_badge"),
                     extra_html=make_maps_link(shop['name'], city['city_name'])
+=======
+                    content=shop["desc"],
+                    badges="Shopping Area",
+                    extra_html=make_maps_link(shop["name"], city["city_name"]),
+>>>>>>> be75e90 (Fix compliance checks and tooling)
                 )
     except Exception:
         st.error("Error loading shopping areas.")
@@ -146,20 +167,28 @@ with tab_food:
             with col_veg:
                 st.markdown(translate_ui("veg_delights"))
                 for food in veg_foods:
+<<<<<<< HEAD
                     render_card(
                         title=f"🍲 {food['name']}",
                         content=food["desc"],
                         badges=[translate_ui("vegetarian_badge")]
                     )
+=======
+                    render_card(title=f"🍲 {food['name']}", content=food["desc"], badges=["Vegetarian"])
+>>>>>>> be75e90 (Fix compliance checks and tooling)
 
             with col_nonveg:
                 st.markdown(translate_ui("non_veg_specials"))
                 for food in non_veg_foods:
+<<<<<<< HEAD
                     render_card(
                         title=f"🍗 {food['name']}",
                         content=food["desc"],
                         badges=[translate_ui("non_vegetarian_badge")]
                     )
+=======
+                    render_card(title=f"🍗 {food['name']}", content=food["desc"], badges=["Non-Vegetarian"])
+>>>>>>> be75e90 (Fix compliance checks and tooling)
 
             if other_foods:
                 st.markdown(translate_ui("local_favorites"))
@@ -168,9 +197,7 @@ with tab_food:
                     col = other_cols[idx % 2]
                     with col:
                         render_card(
-                            title=f"🍽️ {food['name']}",
-                            content=food["desc"],
-                            badges=[food.get("type", "Local Spec")]
+                            title=f"🍽️ {food['name']}", content=food["desc"], badges=[food.get("type", "Local Spec")]
                         )
         else:
             # Fallback to standard clean 2-column grid if not mixed
@@ -185,6 +212,7 @@ with tab_food:
                         trans_badge = translate_ui("non_vegetarian_badge")
                     elif "veg" in ftype.lower():
                         emoji = "🟢"
+<<<<<<< HEAD
                         trans_badge = translate_ui("vegetarian_badge")
                     else:
                         trans_badge = ftype
@@ -193,6 +221,9 @@ with tab_food:
                         content=food["desc"],
                         badges=[trans_badge]
                     )
+=======
+                    render_card(title=f"{emoji} {food['name']}", content=food["desc"], badges=[ftype])
+>>>>>>> be75e90 (Fix compliance checks and tooling)
     except Exception:
         st.error("Error loading food details.")
         st.write(city["food_info"])
@@ -214,7 +245,7 @@ with tab_hotel:
                     title=f"🏨 {bud['name']}",
                     content=bud["desc"],
                     price_badge=bud.get("price", "Budget"),
-                    extra_html=make_maps_link(bud['name'], city['city_name'])
+                    extra_html=make_maps_link(bud["name"], city["city_name"]),
                 )
             else:
                 st.caption("No budget accommodation listed.")
@@ -227,7 +258,7 @@ with tab_hotel:
                     title=f"🏨 {mid['name']}",
                     content=mid["desc"],
                     price_badge=mid.get("price", "Mid-Range"),
-                    extra_html=make_maps_link(mid['name'], city['city_name'])
+                    extra_html=make_maps_link(mid["name"], city["city_name"]),
                 )
             else:
                 st.caption("No mid-range accommodation listed.")
@@ -240,7 +271,7 @@ with tab_hotel:
                     title=f"🏰 {lux['name']}",
                     content=lux["desc"],
                     price_badge=lux.get("price", "Luxury"),
-                    extra_html=make_maps_link(lux['name'], city['city_name'])
+                    extra_html=make_maps_link(lux["name"], city["city_name"]),
                 )
             else:
                 st.caption("No luxury accommodation listed.")
@@ -251,12 +282,19 @@ with tab_hotel:
 # 4. Transit & Airport Guide
 with tab_transit:
     import re
+
     def to_bullets(text):
         if not text:
             return ""
+<<<<<<< HEAD
         # Split by period followed by whitespace and a capital letter or localized letters
         sentences = re.split(r'\.\s+(?=[A-Z]|[\u0900-\u097F]|[\u0C00-\u0C7F])', text.strip())
         return "\n".join(["- " + s.rstrip('.') + "." for s in sentences if s.strip()])
+=======
+        # Split by period followed by whitespace and a capital letter
+        sentences = re.split(r"\.\s+(?=[A-Z])", text.strip())
+        return "\n".join(["- " + s.rstrip(".") + "." for s in sentences if s.strip()])
+>>>>>>> be75e90 (Fix compliance checks and tooling)
 
     col_airport, col_metro = st.columns(2)
 

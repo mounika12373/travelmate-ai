@@ -14,10 +14,7 @@ init_db()
 
 # Page configuration
 st.set_page_config(
-    page_title="TravelMate AI – Smart Travel Companion",
-    page_icon="✈️",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    page_title="TravelMate AI – Smart Travel Companion", page_icon="✈️", layout="wide", initial_sidebar_state="expanded"
 )
 
 # Inject custom global styling
@@ -81,18 +78,38 @@ city_page = st.Page("pages/city_info.py", title=translate_ui("city_info_title"),
 planner_page = st.Page("pages/planner.py", title=translate_ui("planner_title"), icon="📅")
 chatbot_page = st.Page("pages/chatbot.py", title=translate_ui("chatbot_title"), icon="💬")
 
+<<<<<<< HEAD
 # Create Navigation Router (localized headers)
 pg = st.navigation({
     translate_ui("explore"): [home_page, country_page, city_page],
     translate_ui("plan_ask"): [planner_page, chatbot_page]
 })
+=======
+# Custom Sidebar Header styling
+render_html(
+    """
+    <div style='text-align: center; padding: 10px 0;'>
+        <h2 style='margin:0; font-weight:800; color:var(--primary-color); font-size:1.8rem;'>✈️ TravelMate AI</h2>
+        <p style='color:gray; font-size:0.85rem; margin-top:5px;'>Your Smart Travel Companion</p>
+    </div>
+    <hr style='margin-top:0; margin-bottom:15px; border-color:rgba(128,128,128,0.2);'>
+""",
+    sidebar=True,
+)
+
+# Create Navigation Router
+pg = st.navigation({"Explore": [home_page, country_page, city_page], "Plan & Ask": [planner_page, chatbot_page]})
+>>>>>>> be75e90 (Fix compliance checks and tooling)
 
 # Run the Navigation router
 pg.run()
 
 # Custom Sidebar Footer
-render_html(f"""
-    <div style='position: fixed; bottom: 10px; width: 100%; text-align: left; padding: 10px; font-size:0.8rem; color:gray;'>
+render_html(
+    f"""
+    <div style='position: fixed; bottom: 10px; width: 100%; text-align: left; padding-left: 10px;'>
         {translate_ui("made_with_love")}
     </div>
-""", sidebar=True)
+""",
+    sidebar=True,
+)

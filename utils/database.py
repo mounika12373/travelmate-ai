@@ -4,12 +4,14 @@ import sqlite3
 DB_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database")
 DB_PATH = os.path.join(DB_DIR, "travel.db")
 
+
 def get_connection():
     """Returns a connection to the SQLite database with Row factory enabled."""
     os.makedirs(DB_DIR, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 def init_db():
     """Creates the tables if they do not exist and populates them if empty."""
@@ -64,9 +66,11 @@ def init_db():
         conn.close()
         # Seed from sample_data module
         from data.sample_data import populate_database
+
         populate_database()
     else:
         conn.close()
+
 
 def get_all_countries():
     """Fetches all countries."""
@@ -78,6 +82,7 @@ def get_all_countries():
     from utils.i18n import translate_db_record
     return [translate_db_record(dict(row), "country") for row in rows]
 
+
 def get_cities_by_country(country_id):
     """Fetches all cities for a specific country."""
     conn = get_connection()
@@ -87,6 +92,7 @@ def get_cities_by_country(country_id):
     conn.close()
     from utils.i18n import translate_db_record
     return [translate_db_record(dict(row), "city") for row in rows]
+
 
 def get_country_details(country_id):
     """Fetches details of a specific country by ID."""
@@ -99,6 +105,7 @@ def get_country_details(country_id):
         from utils.i18n import translate_db_record
         return translate_db_record(dict(row), "country")
     return None
+
 
 def get_country_by_name(country_name):
     """Fetches details of a country by name (case-insensitive)."""
@@ -113,6 +120,7 @@ def get_country_by_name(country_name):
         return translate_db_record(dict(row), "country")
     return None
 
+
 def get_city_details(city_id):
     """Fetches details of a specific city by ID."""
     conn = get_connection()
@@ -124,6 +132,7 @@ def get_city_details(city_id):
         from utils.i18n import translate_db_record
         return translate_db_record(dict(row), "city")
     return None
+
 
 def get_city_by_name(city_name):
     """Fetches details of a city by name (case-insensitive)."""
@@ -137,6 +146,7 @@ def get_city_by_name(city_name):
     if row:
         return translate_db_record(dict(row), "city")
     return None
+
 
 def search_locations(query):
     """
@@ -153,20 +163,36 @@ def search_locations(query):
     cursor = conn.cursor()
 
     # Search countries
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT * FROM countries 
         WHERE country_name LIKE ? OR capital LIKE ? OR language LIKE ?;
+<<<<<<< HEAD
     """, (q, q, q))
     countries = [translate_db_record(dict(row), "country") for row in cursor.fetchall()]
+=======
+    """,
+        (q, q, q),
+    )
+    countries = [dict(row) for row in cursor.fetchall()]
+>>>>>>> be75e90 (Fix compliance checks and tooling)
 
     # Search cities
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT cities.*, countries.country_name 
         FROM cities 
         JOIN countries ON cities.country_id = countries.id
         WHERE city_name LIKE ? OR description LIKE ? OR tourist_places LIKE ?;
+<<<<<<< HEAD
     """, (q, q, q))
     cities = [translate_db_record(dict(row), "city") for row in cursor.fetchall()]
+=======
+    """,
+        (q, q, q),
+    )
+    cities = [dict(row) for row in cursor.fetchall()]
+>>>>>>> be75e90 (Fix compliance checks and tooling)
 
     conn.close()
     return {"countries": countries, "cities": cities}
