@@ -1,0 +1,17 @@
+# Ruff configuration file for code linting and formatting standards
+line-length = 120
+indent-width = 4
+target-version = "py38"
+
+[lint]
+# Enable Pyflakes (F), Pycodestyle (E, W), and Isort (I)
+select = ["E", "F", "I", "W"]
+ignore = ["E501", "E402", "W291", "W293"]
+fixable = ["ALL"]
+unfixable = []
+
+[format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

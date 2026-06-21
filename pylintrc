@@ -1,0 +1,25 @@
+[MASTER]
+ignore=CVS
+ignore-patterns=
+persistent=yes
+load-plugins=
+
+[MESSAGES CONTROL]
+disable=raw-checker-failed,
+        bad-inline-option,
+        locally-disabled,
+        file-ignored,
+        suppressed-message,
+        useless-suppression,
+        deprecated-pragma,
+        use-symbolic-message-instead,
+        missing-docstring,
+        invalid-name,
+        line-too-long,
+        import-outside-toplevel,
+        unused-argument
+
+[REPORTS]
+output-format=text
+reports=no
+score=yes
