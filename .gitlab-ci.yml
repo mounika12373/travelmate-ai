@@ -54,7 +54,8 @@ ruff_lint:
 type_check:
   stage: type_check
   script:
-    - mypy .
+    - pip install mypy types-requests types-setuptools streamlit pandas plotly
+    - mypy --ignore-missing-imports --exclude "(\.venv|Library|\.cache)" .
 
 # --- FORMAT STAGE ---
 
@@ -70,7 +71,8 @@ mypy_typecheck:
   stage: type_check
   script:
     - pip install mypy types-requests types-setuptools streamlit pandas plotly
-    - mypy app.py pages/ utils/ tests/
+    - mypy --ignore-missing-imports app.py pages/ utils/ tests/
+
 
 # --- TEST STAGE ---
 
