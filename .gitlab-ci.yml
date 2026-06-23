@@ -11,7 +11,10 @@ cache:
 
 stages:
   - lint
+  - format
+  - type_check
   - test
+  - coverage
   - security
   - changelog
 
@@ -21,12 +24,6 @@ before_script:
   - pip install --upgrade pip
 
 # --- LINT STAGE ---
-
-ruff_lint:
-  stage: lint
-  script:
-    - pip install ruff
-    - ruff check .
 
 flake8_lint:
   stage: lint
@@ -46,17 +43,33 @@ vulture_dead_code:
     - pip install vulture
     - vulture --min-confidence=80 app.py pages/ utils/ tests/
 
-mypy_typecheck:
-  stage: lint
-  script:
-    - pip install mypy types-requests types-setuptools streamlit pandas plotly
-    - mypy app.py pages/ utils/ tests/
-
 pyupgrade_syntax:
   stage: lint
   script:
     - pip install pyupgrade
     - find . -name "*.py" -not -path "*/.*" | xargs pyupgrade --py39-plus || true
+
+ruff_lint:
+  stage: lint
+  script:
+    - pip install ruff
+    - ruff check .
+
+# --- FORMAT STAGE ---
+
+ruff_format:
+  stage: format
+  script:
+    - pip install ruff
+    - ruff format --check .
+
+# --- TYPE CHECK STAGE ---
+
+mypy_typecheck:
+  stage: type_check
+  script:
+    - pip install mypy types-requests types-setuptools streamlit pandas plotly
+    - mypy app.py pages/ utils/ tests/
 
 # --- TEST STAGE ---
 
@@ -66,6 +79,15 @@ unit_tests:
     - pip install -r requirements.txt
     - pip install pytest pytest-spec pytest-describe
     - pytest
+
+# --- COVERAGE STAGE ---
+
+test_coverage:
+  stage: coverage
+  script:
+    - pip install -r requirements.txt
+    - pip install pytest pytest-cov
+    - pytest --cov=. --cov-report=term --cov-report=xml
 
 # --- SECURITY STAGE ---
 
@@ -79,7 +101,7 @@ dependency_audit:
   stage: security
   script:
     - pip install pip-audit
-    - pip-audit --strict || true # Allow failure if there are unpatched external deps in the base image, but log the audit
+    - pip-audit --strict || true
 
 secret_scanning:
   stage: security
@@ -88,7 +110,7 @@ secret_scanning:
     entrypoint: [""]
   before_script: []
   script:
-    - gitleaks detect --source=$CI_PROJECT_DIR --verbose || true # Allow warning-based scan
+    - gitleaks detect --source=$CI_PROJECT_DIR --verbose || true
 
 # --- CHANGELOG STAGE ---
 
