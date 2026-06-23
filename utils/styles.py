@@ -155,7 +155,54 @@ def inject_global_css():
         div[data-testid="stSidebarNav"] {
             margin-top: 10px;
         }
+
+        /* Subtle Fade-in Animation for Elements */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        /* Skeleton Loaders for loading states */
+        @keyframes skeletonPulse {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton-line {
+            background: linear-gradient(90deg, rgba(128,128,128,0.06) 25%, rgba(128,128,128,0.15) 50%, rgba(128,128,128,0.06) 75%);
+            background-size: 200% 100%;
+            animation: skeletonPulse 1.5s infinite;
+            border-radius: 6px;
+            height: 16px;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+        .skeleton-title {
+            height: 24px;
+            width: 60%;
+            margin-bottom: 16px;
+        }
+        .skeleton-card {
+            border: 1px solid rgba(128, 128, 128, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            background: var(--secondary-background-color);
+        }
         </style>
+    """)
+
+def render_skeleton_card():
+    """Renders a modern animated skeleton loader card to represent loading states."""
+    render_html("""
+        <div class="skeleton-card">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line" style="width: 90%;"></div>
+            <div class="skeleton-line" style="width: 80%;"></div>
+            <div class="skeleton-line" style="width: 40%;"></div>
+        </div>
     """)
 
 import base64

@@ -49,6 +49,6 @@ def describe_app_router():
         assert mock_session_state["selected_city_id"] == 10
 
         # Verify navigation routes setup
-        assert mock_st.Page.call_count == 5
+        assert mock_st.Page.call_count == 9
         assert mock_st.navigation.called
         assert mock_st.navigation.return_value.run.called

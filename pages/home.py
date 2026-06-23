@@ -21,6 +21,10 @@ search_input = st.text_input(
 
 if search_input:
     results = search_locations(search_input)
+    if st.session_state.get("user") and st.session_state.get("last_logged_search") != search_input:
+        from utils.database import log_activity
+        log_activity(st.session_state.user["id"], "search", search_input)
+        st.session_state.last_logged_search = search_input
 
     col1, col2 = st.columns(2)
 
@@ -34,6 +38,17 @@ if search_input:
                     st.markdown(f"**🌍 {country_name}**")
                     # Capital and Currency labels translated dynamically
                     st.write(f"{translate_ui('capital_label')}: {country['capital']} | {translate_ui('currency_label')}: {country['currency']}")
+                    if st.session_state.get("user"):
+                        from utils.database import save_trip, get_saved_trips
+                        saved = get_saved_trips(st.session_state.user["id"], "destination")
+                        is_saved = any(s["name"] == country_name for s in saved)
+                        if is_saved:
+                            st.caption("⭐️ Bookmarked")
+                        else:
+                            if st.button("Bookmark Country", key=f"bk_c_{country['id']}", use_container_width=True):
+                                save_trip(st.session_state.user["id"], "destination", country_name, "My Saved Trips", {"country_id": country["id"], "description": f"Capital: {country['capital']}, Currency: {country['currency']}"})
+                                st.success(f"Bookmarked {country_name}!")
+                                st.rerun()
                     btn_label = translate_ui("go_to_country_btn").format(country=country_name)
                     if st.button(btn_label, key=f"btn_c_{country['id']}", use_container_width=True):
                         st.session_state.selected_country_id = country["id"]
@@ -49,6 +64,17 @@ if search_input:
                 with st.container(border=True):
                     st.markdown(f"**🏙️ {city_name}** ({city['country_name']})")
                     st.write(city["description"][:100] + "...")
+                    if st.session_state.get("user"):
+                        from utils.database import save_trip, get_saved_trips
+                        saved = get_saved_trips(st.session_state.user["id"], "destination")
+                        is_saved = any(s["name"] == city_name for s in saved)
+                        if is_saved:
+                            st.caption("⭐️ Bookmarked")
+                        else:
+                            if st.button("Bookmark City", key=f"bk_ct_{city['id']}", use_container_width=True):
+                                save_trip(st.session_state.user["id"], "destination", city_name, "My Saved Trips", {"city_id": city["id"], "country_id": city["country_id"], "description": city["description"]})
+                                st.success(f"Bookmarked {city_name}!")
+                                st.rerun()
                     btn_label = translate_ui("explore_city_btn").format(city=city_name)
                     if st.button(btn_label, key=f"btn_ct_{city['id']}", use_container_width=True):
                         st.session_state.selected_country_id = city["country_id"]
@@ -95,6 +121,17 @@ else:
         **{translate_ui('currency_label')}:** {selected_country['currency']}  
         **{translate_ui('language_label')}:** {selected_country['language']}  
         """)
+        if st.session_state.get("user"):
+            from utils.database import save_trip, get_saved_trips
+            saved = get_saved_trips(st.session_state.user["id"], "destination")
+            is_saved = any(s["name"] == selected_country_name for s in saved)
+            if is_saved:
+                st.caption("⭐️ Bookmarked")
+            else:
+                if st.button("Bookmark Country", key="bk_sel_c", use_container_width=True):
+                    save_trip(st.session_state.user["id"], "destination", selected_country_name, "My Saved Trips", {"country_id": selected_country["id"], "description": f"Capital: {selected_country['capital']}, Currency: {selected_country['currency']}"})
+                    st.success(f"Bookmarked {selected_country_name}!")
+                    st.rerun()
         if st.button(translate_ui("view_country_guide"), use_container_width=True):
             st.switch_page("pages/country_info.py")
 
@@ -123,6 +160,17 @@ else:
             **{translate_ui('description') if 'description' in selected_city else 'Description'}:**  
             {selected_city['description'][:140]}...
             """)
+            if st.session_state.get("user"):
+                from utils.database import save_trip, get_saved_trips
+                saved = get_saved_trips(st.session_state.user["id"], "destination")
+                is_saved = any(s["name"] == selected_city_name for s in saved)
+                if is_saved:
+                    st.caption("⭐️ Bookmarked")
+                else:
+                    if st.button("Bookmark City", key="bk_sel_ct", use_container_width=True):
+                        save_trip(st.session_state.user["id"], "destination", selected_city_name, "My Saved Trips", {"city_id": selected_city["id"], "country_id": selected_city["country_id"], "description": selected_city["description"]})
+                        st.success(f"Bookmarked {selected_city_name}!")
+                        st.rerun()
             if st.button(translate_ui("view_city_details"), use_container_width=True):
                 st.switch_page("pages/city_info.py")
         else:

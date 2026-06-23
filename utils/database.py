@@ -55,6 +55,51 @@ def init_db():
     );
     """)
 
+    # Create users table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        full_name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        phone TEXT,
+        country TEXT,
+        city TEXT,
+        profile_pic TEXT,            -- Base64 encoded image string or None
+        password_hash TEXT NOT NULL,  -- hashed password
+        preferences TEXT,            -- JSON array of strings
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+
+    # Create travel_history table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS travel_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        activity_type TEXT NOT NULL, -- 'search', 'itinerary', 'hotel_search', 'flight_search', 'chat'
+        query TEXT,
+        details TEXT,                -- JSON string storing metadata/itinerary
+        is_favorite INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    );
+    """)
+
+    # Create saved_trips table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS saved_trips (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        trip_type TEXT NOT NULL,     -- 'itinerary', 'destination', 'hotel', 'flight'
+        name TEXT NOT NULL,
+        collection_name TEXT DEFAULT 'My Saved Trips',
+        details TEXT NOT NULL,       -- JSON string containing details
+        travel_date TEXT,            -- 'YYYY-MM-DD'
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    );
+    """)
+
     conn.commit()
 
     # Check if empty. If so, seed database with sample data.
@@ -170,3 +215,238 @@ def search_locations(query):
 
     conn.close()
     return {"countries": countries, "cities": cities}
+
+# ==========================================
+# NEW USER AUTH & PROFILE PERSISTENCE METHODS
+# ==========================================
+
+def create_user(full_name, email, phone, country, city, profile_pic, password_hash, preferences="[]"):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+        INSERT INTO users (full_name, email, phone, country, city, profile_pic, password_hash, preferences)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+        """, (full_name, email.strip().lower(), phone, country, city, profile_pic, password_hash, preferences))
+        conn.commit()
+        user_id = cursor.lastrowid
+        conn.close()
+        return user_id
+    except sqlite3.IntegrityError:
+        conn.close()
+        return None
+
+def get_user_by_email(email):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE LOWER(email) = LOWER(?);", (email.strip(),))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def get_user_by_id(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE id = ?;", (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def update_user_profile(user_id, full_name, phone, country, city, profile_pic, preferences):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    UPDATE users 
+    SET full_name = ?, phone = ?, country = ?, city = ?, profile_pic = ?, preferences = ?
+    WHERE id = ?;
+    """, (full_name, phone, country, city, profile_pic, preferences, user_id))
+    conn.commit()
+    conn.close()
+    return True
+
+# ==========================================
+# ACTIVITY TRACKING & TRAVEL HISTORY LOGS
+# ==========================================
+
+def log_activity(user_id, activity_type, query, details=None):
+    import json
+    if details and not isinstance(details, str):
+        details = json.dumps(details)
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    INSERT INTO travel_history (user_id, activity_type, query, details)
+    VALUES (?, ?, ?, ?);
+    """, (user_id, activity_type, query, details))
+    conn.commit()
+    conn.close()
+
+def get_travel_history(user_id, activity_type=None, search_query=None, start_date=None, end_date=None, country=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    query = "SELECT * FROM travel_history WHERE user_id = ?"
+    params = [user_id]
+    
+    if activity_type:
+        query += " AND activity_type = ?"
+        params.append(activity_type)
+        
+    if search_query:
+        query += " AND (query LIKE ? OR details LIKE ?)"
+        params.append(f"%{search_query}%")
+        params.append(f"%{search_query}%")
+        
+    if start_date:
+        query += " AND date(created_at) >= date(?)"
+        params.append(start_date)
+        
+    if end_date:
+        query += " AND date(created_at) <= date(?)"
+        params.append(end_date)
+        
+    if country:
+        query += " AND (query LIKE ? OR details LIKE ?)"
+        params.append(f"%{country}%")
+        params.append(f"%{country}%")
+        
+    query += " ORDER BY created_at DESC"
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+def delete_history_item(history_id, user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM travel_history WHERE id = ? AND user_id = ?;", (history_id, user_id))
+    conn.commit()
+    conn.close()
+
+def clear_user_history(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM travel_history WHERE user_id = ?;", (user_id,))
+    conn.commit()
+    conn.close()
+
+def toggle_history_favorite(history_id, user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT is_favorite FROM travel_history WHERE id = ? AND user_id = ?;", (history_id, user_id))
+    row = cursor.fetchone()
+    if row:
+        new_val = 1 if row["is_favorite"] == 0 else 0
+        cursor.execute("UPDATE travel_history SET is_favorite = ? WHERE id = ? AND user_id = ?;", (new_val, history_id, user_id))
+        conn.commit()
+    conn.close()
+
+# ==========================================
+# SAVED TRIPS & BOOKMARKS SYSTEMS
+# ==========================================
+
+def save_trip(user_id, trip_type, name, collection_name, details, travel_date=None):
+    import json
+    if details and not isinstance(details, str):
+        details = json.dumps(details)
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    INSERT INTO saved_trips (user_id, trip_type, name, collection_name, details, travel_date)
+    VALUES (?, ?, ?, ?, ?, ?);
+    """, (user_id, trip_type, name, collection_name, details, travel_date))
+    conn.commit()
+    conn.close()
+
+def get_saved_trips(user_id, trip_type=None, collection_name=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = "SELECT * FROM saved_trips WHERE user_id = ?"
+    params = [user_id]
+    if trip_type:
+        query += " AND trip_type = ?"
+        params.append(trip_type)
+    if collection_name:
+        query += " AND collection_name = ?"
+        params.append(collection_name)
+    query += " ORDER BY created_at DESC"
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+def delete_saved_trip(saved_trip_id, user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM saved_trips WHERE id = ? AND user_id = ?;", (saved_trip_id, user_id))
+    conn.commit()
+    conn.close()
+
+# ==========================================
+# DASHBOARD ANALYTICS & STATS AGGREGATORS
+# ==========================================
+
+def get_dashboard_stats(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # 1. Total Trips Planned
+    cursor.execute("SELECT COUNT(*) as count FROM saved_trips WHERE user_id = ? AND trip_type = 'itinerary';", (user_id,))
+    total_saved_itineraries = cursor.fetchone()["count"]
+    
+    cursor.execute("SELECT COUNT(*) as count FROM travel_history WHERE user_id = ? AND activity_type = 'itinerary';", (user_id,))
+    total_generated_itineraries = cursor.fetchone()["count"]
+    
+    # 2. Countries Explored (distinct country keyword from history and saved)
+    cursor.execute("SELECT DISTINCT query FROM travel_history WHERE user_id = ? AND activity_type IN ('search', 'itinerary');", (user_id,))
+    searches = [r["query"] for r in cursor.fetchall() if r["query"]]
+    
+    cursor.execute("SELECT DISTINCT name FROM saved_trips WHERE user_id = ? AND trip_type = 'destination';", (user_id,))
+    destinations = [r["name"] for r in cursor.fetchall() if r["name"]]
+    
+    countries_set = set()
+    for text in searches + destinations:
+        t_lower = text.lower()
+        if any(w in t_lower for w in ["india", "भारत", "భారతదేశం", "hyderabad", "visakhapatnam", "mumbai", "delhi", "bangalore", "chennai", "kolkata", "jaipur", "agra", "varanasi", "kochi", "goa", "udaipur", "pune", "ahmedabad", "amritsar", "srinagar", "shimla", "darjeeling", "mysore"]):
+            countries_set.add("India")
+        if any(w in t_lower for w in ["japan", "जापान", "జపాన్", "tokyo", "osaka", "kyoto", "yokohama", "nagoya", "sapporo", "fukuoka", "kobe", "hiroshima", "nara", "okinawa", "kanazawa", "hakodate", "nagasaki", "sendai", "takayama", "himeji", "kamakura", "nikko", "matsumoto"]):
+            countries_set.add("Japan")
+        if any(w in t_lower for w in ["singapore", "सिंगापुर", "సింగపూర్", "downtown", "sentosa", "orchard", "chinatown", "little india", "katong", "tampines", "jurong", "woodlands", "changi", "yishun", "ang mo kio", "bedok", "queenstown", "novena", "bukit timah", "punggol", "clementi", "serangoon"]):
+            countries_set.add("Singapore")
+            
+    countries_explored = len(countries_set)
+    if countries_explored == 0 and (total_saved_itineraries > 0 or total_generated_itineraries > 0):
+        countries_explored = 1
+        
+    # 3. Saved Destinations Count
+    cursor.execute("SELECT COUNT(*) as count FROM saved_trips WHERE user_id = ? AND trip_type = 'destination';", (user_id,))
+    saved_destinations = cursor.fetchone()["count"]
+    
+    # 4. Recent Searches (top 5)
+    cursor.execute("SELECT DISTINCT query, created_at FROM travel_history WHERE user_id = ? AND activity_type = 'search' ORDER BY created_at DESC LIMIT 5;", (user_id,))
+    recent_searches = [dict(row) for row in cursor.fetchall()]
+    
+    # 5. AI Usage Statistics
+    cursor.execute("SELECT COUNT(*) as count FROM travel_history WHERE user_id = ? AND activity_type = 'chat';", (user_id,))
+    chat_interactions = cursor.fetchone()["count"]
+    
+    # 6. Upcoming Trips Timeline
+    cursor.execute("""
+        SELECT * FROM saved_trips 
+        WHERE user_id = ? AND trip_type = 'itinerary' AND travel_date IS NOT NULL AND travel_date != '' 
+        ORDER BY date(travel_date) ASC;
+    """, (user_id,))
+    upcoming_trips = [dict(row) for row in cursor.fetchall()]
+    
+    conn.close()
+    return {
+        "total_trips": total_saved_itineraries + total_generated_itineraries,
+        "countries_explored": countries_explored,
+        "saved_destinations": saved_destinations,
+        "recent_searches": recent_searches,
+        "ai_usage": {
+            "itineraries_generated": total_generated_itineraries,
+            "chatbot_interactions": chat_interactions
+        },
+        "upcoming_trips": upcoming_trips
+    }

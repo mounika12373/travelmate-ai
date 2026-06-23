@@ -11,8 +11,31 @@ from utils.database import (
 )
 from utils.i18n import get_english_term, translate_ui
 from utils.styles import render_hero
+from utils.chatbot_agent import is_agent_enabled, run_agent_query
 
 render_hero(translate_ui("ai_chatbot_title"), translate_ui("ai_chatbot_subtitle"))
+
+# AI Engine status indicator
+if is_agent_enabled():
+    st.markdown(
+        """
+        <div style='display:inline-flex; align-items:center; gap:8px; background:rgba(0,200,100,0.1); border:1px solid rgba(0,200,100,0.25); border-radius:100px; padding:6px 16px; margin-bottom:20px;'>
+            <span style='width:8px; height:8px; background:#00c864; border-radius:50%; display:inline-block; box-shadow:0 0 8px #00c864;'></span>
+            <span style='font-size:0.85rem; font-weight:700; color:#00c864;'>Agent Kit AI Engine Active (Autonomous Tools)</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+else:
+    st.markdown(
+        """
+        <div style='display:inline-flex; align-items:center; gap:8px; background:rgba(128,128,128,0.1); border:1px solid rgba(128,128,128,0.2); border-radius:100px; padding:6px 16px; margin-bottom:20px;'>
+            <span style='width:8px; height:8px; background:gray; border-radius:50%; display:inline-block;'></span>
+            <span style='font-size:0.85rem; font-weight:700; color:gray;'>Offline Mode Active (Rule-based Fallback)</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 # Helper function to match keywords and generate context-rich answers
 def generate_bot_response(user_query, active_country_id, active_city_id):
@@ -184,11 +207,34 @@ if user_prompt:
     st.session_state.messages.append({"role": "user", "content": user_prompt})
 
     # Generate response
-    response = generate_bot_response(
-        user_prompt,
-        st.session_state.get("selected_country_id"),
-        st.session_state.get("selected_city_id")
-    )
+    if is_agent_enabled():
+        try:
+            with st.spinner("TravelMate AI is thinking..."):
+                response = run_agent_query(
+                    user_id=st.session_state.user["email"] if st.session_state.get("user") else "guest_user",
+                    session_id=st.session_state.get("chat_language", "en"),
+                    query_text=user_prompt,
+                    active_country_id=st.session_state.get("selected_country_id"),
+                    active_city_id=st.session_state.get("selected_city_id")
+                )
+        except Exception as e:
+            st.warning(f"Agent Kit encountered an error: {e}. Falling back to rule-based response.")
+            response = generate_bot_response(
+                user_prompt,
+                st.session_state.get("selected_country_id"),
+                st.session_state.get("selected_city_id")
+            )
+    else:
+        response = generate_bot_response(
+            user_prompt,
+            st.session_state.get("selected_country_id"),
+            st.session_state.get("selected_city_id")
+        )
+
+    # Auto-Log Chat Activity
+    if st.session_state.get("user"):
+        from utils.database import log_activity
+        log_activity(st.session_state.user["id"], "chat", user_prompt, {"response": response})
 
     # Display assistant response with a simulated typing speed
     with st.chat_message("assistant"):

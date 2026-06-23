@@ -12,23 +12,91 @@ cache:
 stages:
   - lint
   - test
+  - security
+  - changelog
 
-lint:
+before_script:
+  - python -m venv .venv
+  - source .venv/bin/activate || .venv/Scripts/activate || true
+  - pip install --upgrade pip
+
+# --- LINT STAGE ---
+
+ruff_lint:
   stage: lint
-  before_script:
-    - python -m venv .venv
-    - source .venv/bin/activate || .venv/Scripts/activate
-    - pip install --upgrade pip
-    - pip install ruff
   script:
+    - pip install ruff
     - ruff check .
 
-test:
-  stage: test
-  before_script:
-    - python -m venv .venv
-    - source .venv/bin/activate || .venv/Scripts/activate
-    - pip install --upgrade pip
-    - pip install -r requirements.txt
+flake8_lint:
+  stage: lint
   script:
+    - pip install flake8
+    - flake8 --config=.flake8 .
+
+pylint_lint:
+  stage: lint
+  script:
+    - pip install pylint streamlit pandas plotly
+    - pylint --rcfile=pylintrc app.py pages/ utils/ tests/
+
+vulture_dead_code:
+  stage: lint
+  script:
+    - pip install vulture
+    - vulture --min-confidence=80 app.py pages/ utils/ tests/
+
+mypy_typecheck:
+  stage: lint
+  script:
+    - pip install mypy types-requests types-setuptools streamlit pandas plotly
+    - mypy app.py pages/ utils/ tests/
+
+pyupgrade_syntax:
+  stage: lint
+  script:
+    - pip install pyupgrade
+    - find . -name "*.py" -not -path "*/.*" | xargs pyupgrade --py39-plus || true
+
+# --- TEST STAGE ---
+
+unit_tests:
+  stage: test
+  script:
+    - pip install -r requirements.txt
+    - pip install pytest pytest-spec pytest-describe
     - pytest
+
+# --- SECURITY STAGE ---
+
+bandit_static_analysis:
+  stage: security
+  script:
+    - pip install bandit[toml]
+    - bandit -r . -c pyproject.toml
+
+dependency_audit:
+  stage: security
+  script:
+    - pip install pip-audit
+    - pip-audit --strict || true # Allow failure if there are unpatched external deps in the base image, but log the audit
+
+secret_scanning:
+  stage: security
+  image: 
+    name: zricethezav/gitleaks:latest
+    entrypoint: [""]
+  before_script: []
+  script:
+    - gitleaks detect --source=$CI_PROJECT_DIR --verbose || true # Allow warning-based scan
+
+# --- CHANGELOG STAGE ---
+
+automated_changelog:
+  stage: changelog
+  script:
+    - pip install git-cliff || cargo install git-cliff || true
+    - git-cliff --config cliff.toml --output CHANGELOG.md || true
+  artifacts:
+    paths:
+      - CHANGELOG.md

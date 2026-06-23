@@ -62,6 +62,14 @@ st.session_state.selected_city_id = selected_city["id"]
 # Load specific city details
 city = get_city_details(st.session_state.selected_city_id)
 
+# Track and Auto-Log City Info exploration
+if st.session_state.get("user"):
+    from utils.database import log_activity
+    current_exploration = f"explore_city_{city['id']}"
+    if st.session_state.get("last_logged_exploration") != current_exploration:
+        log_activity(st.session_state.user["id"], "search", f"Explored city details: {city['city_name']}")
+        st.session_state.last_logged_exploration = current_exploration
+
 # Hero section for the city
 render_hero(city["city_name"], city["description"])
 

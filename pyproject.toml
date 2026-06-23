@@ -18,7 +18,8 @@ classifiers = [
 dependencies = [
     "streamlit>=1.35.0",
     "pandas>=2.0.0",
-    "plotly>=5.15.0"
+    "plotly>=5.15.0",
+    "google-adk"
 ]
 
 [project.optional-dependencies]
@@ -38,3 +39,17 @@ python_files = ["test_*.py"]
 
 [tool.setuptools]
 packages = []
+
+[tool.vulture]
+exclude = [".venv"]
+ignore_decorators = []
+ignore_names = []
+make_whitelist = false
+min_confidence = 80
+paths = ["app.py", "pages", "utils", "tests"]
+sort_by_size = true
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv"]
+targets = ["."]
+

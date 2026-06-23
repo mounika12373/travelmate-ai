@@ -33,6 +33,14 @@ st.session_state.selected_country_id = selected_country["id"]
 # Fetch latest country details
 country = get_country_details(st.session_state.selected_country_id)
 
+# Track and Auto-Log Country Info exploration
+if st.session_state.get("user"):
+    from utils.database import log_activity
+    current_exploration = f"explore_country_{country['id']}"
+    if st.session_state.get("last_logged_exploration") != current_exploration:
+        log_activity(st.session_state.user["id"], "search", f"Explored country details: {country['country_name']}")
+        st.session_state.last_logged_exploration = current_exploration
+
 # Hero header for the country
 title_text = translate_ui("explore_country_title").format(country=country['country_name'])
 sub_text = translate_ui("country_hero_subtitle").format(country=country['country_name'])
