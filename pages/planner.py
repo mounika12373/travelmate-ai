@@ -8,15 +8,8 @@ from utils.database import get_all_countries, get_cities_by_country, get_city_de
 from utils.i18n import translate_ui
 from utils.styles import render_hero, render_html
 
-<<<<<<< HEAD
 # Render localized hero
 render_hero(translate_ui("smart_planner_title"), translate_ui("smart_planner_subtitle"))
-=======
-render_hero(
-    "📅 Smart Travel Planner",
-    "Plan your custom itinerary, calculate your budget breakdown, and view customized hotel recommendations.",
-)
->>>>>>> be75e90 (Fix compliance checks and tooling)
 
 # Load destinations list
 countries = get_all_countries()
@@ -56,12 +49,8 @@ with col_in3:
     luxury_label = translate_ui("budget_luxury")
     
     budget_tier = st.selectbox(
-<<<<<<< HEAD
         translate_ui("choose_budget_tier"),
         [economy_label, mid_range_label, luxury_label]
-=======
-        "Choose Budget Tier", ["Economy (Cost-Effective)", "Mid-Range (Balanced)", "Luxury (Premium Experience)"]
->>>>>>> be75e90 (Fix compliance checks and tooling)
     )
     # Simplify budget string key
     if budget_tier == economy_label:
@@ -183,18 +172,9 @@ with col_plan:
     st.markdown(translate_ui("custom_itinerary").format(days=num_days, city=city['city_name']))
 
     # Hotel recommendation
-<<<<<<< HEAD
     hotel_suggestion = hotels.get(budget_key, {"name": "Local Stay", "desc": "Conveniently located accommodation.", "price": ""})
     rec_stay_lbl = translate_ui("recommended_stay_label").format(tier=budget_tier_display)
     st.info(f"🏨 **{rec_stay_lbl}** **{hotel_suggestion['name']}**\n\n*{hotel_suggestion['desc']}* (Est: {hotel_suggestion.get('price', '')})")
-=======
-    hotel_suggestion = hotels.get(
-        budget_key, {"name": "Local Stay", "desc": "Conveniently located accommodation.", "price": ""}
-    )
-    st.info(
-        f"🏨 **Recommended Stay ({budget_tier.split(' ')[0]}):** **{hotel_suggestion['name']}**\n\n*{hotel_suggestion['desc']}* (Est: {hotel_suggestion.get('price', '')})"
-    )
->>>>>>> be75e90 (Fix compliance checks and tooling)
     st.write("")
 
     # Distribute elements dynamically
@@ -252,18 +232,13 @@ with col_budget:
         <div style="background-color: var(--secondary-background-color); border: 2px solid var(--primary-color); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 25px;">
             <div style="font-size: 0.9rem; color: gray; text-transform: uppercase;">{total_est_exp}</div>
             <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary-color);">{currency_symbol} {total_budget:,} {currency_code}</div>
-<<<<<<< HEAD
             <div style="font-size: 0.85rem; color: gray; margin-top:5px;">{details_lbl}</div>
-=======
-            <div style="font-size: 0.85rem; color: gray; margin-top:5px;">For {num_days} days &bull; {budget_tier.split(" ")[0]} tier</div>
->>>>>>> be75e90 (Fix compliance checks and tooling)
         </div>
     """)
 
     # Dataframe for table and chart
     budget_data = {
         "Expense Category": [
-<<<<<<< HEAD
             translate_ui("category_accommodation"),
             translate_ui("category_food"),
             translate_ui("category_transport"),
@@ -271,15 +246,6 @@ with col_budget:
             translate_ui("category_shopping")
         ],
         "Amount": [accommodation_cost, food_cost, transport_cost, sightseeing_cost, shopping_cost]
-=======
-            "🏨 Accommodation",
-            "🍜 Food & Dining",
-            "🚌 Transport",
-            "🎟️ Sightseeing",
-            "🎁 Shopping/Misc",
-        ],
-        "Amount": [accommodation_cost, food_cost, transport_cost, sightseeing_cost, shopping_cost],
->>>>>>> be75e90 (Fix compliance checks and tooling)
     }
     df_budget = pd.DataFrame(budget_data)
 

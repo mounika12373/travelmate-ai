@@ -125,6 +125,7 @@ def get_all_countries():
     rows = cursor.fetchall()
     conn.close()
     from utils.i18n import translate_db_record
+
     return [translate_db_record(dict(row), "country") for row in rows]
 
 
@@ -136,6 +137,7 @@ def get_cities_by_country(country_id):
     rows = cursor.fetchall()
     conn.close()
     from utils.i18n import translate_db_record
+
     return [translate_db_record(dict(row), "city") for row in rows]
 
 
@@ -148,6 +150,7 @@ def get_country_details(country_id):
     conn.close()
     if row:
         from utils.i18n import translate_db_record
+
         return translate_db_record(dict(row), "country")
     return None
 
@@ -155,6 +158,7 @@ def get_country_details(country_id):
 def get_country_by_name(country_name):
     """Fetches details of a country by name (case-insensitive)."""
     from utils.i18n import get_english_term, translate_db_record
+
     eng_name = get_english_term(country_name)
     conn = get_connection()
     cursor = conn.cursor()
@@ -175,6 +179,7 @@ def get_city_details(city_id):
     conn.close()
     if row:
         from utils.i18n import translate_db_record
+
         return translate_db_record(dict(row), "city")
     return None
 
@@ -182,6 +187,7 @@ def get_city_details(city_id):
 def get_city_by_name(city_name):
     """Fetches details of a city by name (case-insensitive)."""
     from utils.i18n import get_english_term, translate_db_record
+
     eng_name = get_english_term(city_name)
     conn = get_connection()
     cursor = conn.cursor()
@@ -202,6 +208,7 @@ def search_locations(query):
         return {"countries": [], "cities": []}
 
     from utils.i18n import get_english_term, translate_db_record
+
     eng_query = get_english_term(query)
     q = f"%{eng_query.strip()}%"
     conn = get_connection()
@@ -212,15 +219,10 @@ def search_locations(query):
         """
         SELECT * FROM countries 
         WHERE country_name LIKE ? OR capital LIKE ? OR language LIKE ?;
-<<<<<<< HEAD
-    """, (q, q, q))
-    countries = [translate_db_record(dict(row), "country") for row in cursor.fetchall()]
-=======
     """,
         (q, q, q),
     )
-    countries = [dict(row) for row in cursor.fetchall()]
->>>>>>> be75e90 (Fix compliance checks and tooling)
+    countries = [translate_db_record(dict(row), "country") for row in cursor.fetchall()]
 
     # Search cities
     cursor.execute(
@@ -229,15 +231,10 @@ def search_locations(query):
         FROM cities 
         JOIN countries ON cities.country_id = countries.id
         WHERE city_name LIKE ? OR description LIKE ? OR tourist_places LIKE ?;
-<<<<<<< HEAD
-    """, (q, q, q))
-    cities = [translate_db_record(dict(row), "city") for row in cursor.fetchall()]
-=======
     """,
         (q, q, q),
     )
-    cities = [dict(row) for row in cursor.fetchall()]
->>>>>>> be75e90 (Fix compliance checks and tooling)
+    cities = [translate_db_record(dict(row), "city") for row in cursor.fetchall()]
 
     conn.close()
     return {"countries": countries, "cities": cities}

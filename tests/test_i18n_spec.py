@@ -39,11 +39,7 @@ def describe_i18n_module():
         assert translated == country_record
 
     def it_translates_country_db_records_to_hindi_and_telugu():
-        country_record = {
-            "country_name": "India",
-            "capital": "New Delhi",
-            "currency": "Indian Rupee (INR, ₹)"
-        }
+        country_record = {"country_name": "India", "capital": "New Delhi", "currency": "Indian Rupee (INR, ₹)"}
 
         # Hindi country record translation
         st.session_state.language = "hi"
@@ -59,19 +55,20 @@ def describe_i18n_module():
 
     def it_translates_city_db_records_and_nested_json():
         import json
+
         city_record = {
             "city_name": "Hyderabad",
             "description": "Original description in English.",
-            "food_info": json.dumps([
-                {"name": "Hyderabadi Biryani", "desc": "Rice cooked with meat", "type": "Non-Veg"}
-            ])
+            "food_info": json.dumps(
+                [{"name": "Hyderabadi Biryani", "desc": "Rice cooked with meat", "type": "Non-Veg"}]
+            ),
         }
 
         st.session_state.language = "hi"
         translated = translate_db_record(city_record, "city")
         assert translated["city_name"] == "हैदराबाद"
         assert translated["description"] != city_record["description"]
-        
+
         # Verify nested JSON translated successfully
         translated_food = json.loads(translated["food_info"])
         assert translated_food[0]["name"] == "हैदराबादी बिरयानी"

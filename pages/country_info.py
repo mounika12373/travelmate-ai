@@ -20,14 +20,10 @@ if st.session_state.selected_country_id:
 
 st.sidebar.subheader(translate_ui("explore_another_country"))
 selected_country_name = st.sidebar.selectbox(
-<<<<<<< HEAD
     translate_ui("select_country"),
     country_names,
     index=current_c_index if current_c_index < len(country_names) else 0,
     key="country_info_select"
-=======
-    "Select Country", country_names, index=current_c_index, key="country_info_select"
->>>>>>> be75e90 (Fix compliance checks and tooling)
 )
 
 # Sync with state
@@ -46,16 +42,9 @@ if st.session_state.get("user"):
         st.session_state.last_logged_exploration = current_exploration
 
 # Hero header for the country
-<<<<<<< HEAD
 title_text = translate_ui("explore_country_title").format(country=country['country_name'])
 sub_text = translate_ui("country_hero_subtitle").format(country=country['country_name'])
 render_hero(title_text, sub_text)
-=======
-render_hero(
-    f"Explore {country['country_name']}",
-    f"Essential facts, visa details, local laws, and cultural etiquette for visiting {country['country_name']}.",
-)
->>>>>>> be75e90 (Fix compliance checks and tooling)
 
 # 1. Quick Facts Grid
 st.markdown(translate_ui("country_profile"))
@@ -64,49 +53,29 @@ qcol1, qcol2, qcol3, qcol4 = st.columns(4)
 with qcol1:
     render_html(f"""
         <div class="metric-box">
-<<<<<<< HEAD
             <div class="metric-label">{translate_ui("capital_label")}</div>
             <div class="metric-value">🏛️ {country['capital']}</div>
-=======
-            <div class="metric-label">Capital City</div>
-            <div class="metric-value">🏛️ {country["capital"]}</div>
->>>>>>> be75e90 (Fix compliance checks and tooling)
         </div>
     """)
 with qcol2:
     render_html(f"""
         <div class="metric-box">
-<<<<<<< HEAD
             <div class="metric-label">{translate_ui("currency_label")}</div>
             <div class="metric-value">💵 {country['currency']}</div>
-=======
-            <div class="metric-label">Local Currency</div>
-            <div class="metric-value">💵 {country["currency"]}</div>
->>>>>>> be75e90 (Fix compliance checks and tooling)
         </div>
     """)
 with qcol3:
     render_html(f"""
         <div class="metric-box">
-<<<<<<< HEAD
             <div class="metric-label">{translate_ui("language_label")}</div>
             <div class="metric-value">🗣️ {country['language']}</div>
-=======
-            <div class="metric-label">Spoken Languages</div>
-            <div class="metric-value">🗣️ {country["language"]}</div>
->>>>>>> be75e90 (Fix compliance checks and tooling)
         </div>
     """)
 with qcol4:
     render_html(f"""
         <div class="metric-box">
-<<<<<<< HEAD
             <div class="metric-label">{translate_ui("timezone_label")}</div>
             <div class="metric-value">⏰ {country['timezone']}</div>
-=======
-            <div class="metric-label">Standard Timezone</div>
-            <div class="metric-value">⏰ {country["timezone"]}</div>
->>>>>>> be75e90 (Fix compliance checks and tooling)
         </div>
     """)
 
@@ -116,37 +85,24 @@ st.write("")
 st.warning(f"{translate_ui('emergency_numbers_label')} {country['emergency_number']}")
 
 # 2. Main Content Tabs
-<<<<<<< HEAD
 tab_visa, tab_rules, tab_safety = st.tabs([
     translate_ui("visa_tab"),
     translate_ui("rules_tab"),
     translate_ui("safety_tab")
 ])
-=======
-tab_visa, tab_rules, tab_safety = st.tabs(
-    ["📑 Visa & Entry Requirements", "📜 Rules & Cultural Etiquette", "🛡️ Safety & Travel Tips"]
-)
->>>>>>> be75e90 (Fix compliance checks and tooling)
 
 with tab_visa:
     st.markdown(translate_ui("visa_requirements_title"))
     st.info(country["visa_info"])
 
     st.markdown(translate_ui("pre_departure_checklist"))
-    is_sg = country['country_name'].lower() in ['singapore', 'सिंगापुर', 'సింగపూర్']
+    is_sg = country['country_name'].lower() in ['singapore', 'సింగపూర్', 'सिंगापुर']
     visa_form_msg = translate_ui("checklist_visa_sg") if is_sg else translate_ui("checklist_visa_evisa")
     st.markdown(f"""
-<<<<<<< HEAD
     - [ ] {translate_ui("checklist_passport")}
     - [ ] {visa_form_msg}
     - [ ] {translate_ui("checklist_insurance")}
     - [ ] {translate_ui("checklist_bank")}
-=======
-    - [ ] Check passport validity (should have at least 6 months validity from departure date).
-    - [ ] Complete visa or online entry forms (e.g. {"SG Arrival Card" if country["country_name"].lower() == "singapore" else "eVisa application"}).
-    - [ ] Secure health or travel insurance covering local medical systems.
-    - [ ] Inform your bank about travel dates to prevent card locks.
->>>>>>> be75e90 (Fix compliance checks and tooling)
     """)
 
 with tab_rules:
@@ -157,14 +113,7 @@ with tab_rules:
         rules_list = country["rules"].split("\n")
         for rule in rules_list:
             if rule.strip():
-<<<<<<< HEAD
                 render_html(f"<div style='background-color:rgba(239, 68, 68, 0.05); padding:10px; border-left:3px solid #EF4444; border-radius:4px; margin-bottom:10px;'>{rule}</div>")
-=======
-                # Extract description if formatting is like "1. Name: desc"
-                render_html(
-                    f"<div style='background-color:rgba(239, 68, 68, 0.05); padding:10px; border-left:3px solid #EF4444; border-radius:4px; margin-bottom:10px;'>{rule}</div>"
-                )
->>>>>>> be75e90 (Fix compliance checks and tooling)
 
     with col_etiquette:
         st.markdown(translate_ui("cultural_dos_donts"))
@@ -195,18 +144,45 @@ with tab_safety:
 
 # List of available cities in this country as a quick jumping point
 st.divider()
-st.subheader(translate_ui("cities_in_country").format(country=country['country_name']))
+
+st.subheader(
+    translate_ui("cities_in_country").format(
+        country=country["country_name"]
+    )
+)
+
 cities = get_cities_by_country(country["id"])
+
 if cities:
     ccols = st.columns(len(cities))
+
     for idx, city in enumerate(cities):
         with ccols[idx]:
             with st.container(border=True):
-                st.markdown(f"**{city['city_name']}**")
-                st.write(city["description"][:90] + "...")
-                btn_lbl = translate_ui("explore_city_btn").format(city=city['city_name'])
-                if st.button(btn_lbl, key=f"c_btn_{city['id']}", use_container_width=True):
+                st.markdown(
+                    f"**{city['city_name']}**"
+                )
+
+                st.write(
+                    city["description"][:90] + "..."
+                )
+
+                btn_lbl = translate_ui(
+                    "explore_city_btn"
+                ).format(
+                    city=city["city_name"]
+                )
+
+                if st.button(
+                    btn_lbl,
+                    key=f"c_btn_{city['id']}",
+                    use_container_width=True,
+                ):
                     st.session_state.selected_city_id = city["id"]
-                    st.switch_page("pages/city_info.py")
+                    st.switch_page(
+                        "pages/city_info.py"
+                    )
 else:
-    st.write(translate_ui("no_cities_warning"))
+    st.write(
+        translate_ui("no_cities_warning")
+    )
