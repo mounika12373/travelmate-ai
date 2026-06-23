@@ -1,190 +1,159 @@
-# ✈️ TravelMate AI – Smart Travel Companion
+# 💬 TravelMate AI — Smart Travel Companion
 
-[![GitLab CI Pipeline](https://img.shields.io/badge/gitlab--ci-pipeline--passing-brightgreen?logo=gitlab)](https://code.swecha.org/sweety28/travel-information-and-guide)
-[![Pre-Commit Enabled](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
-[![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11-blue?logo=python)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-AGPLv3-blue.svg)](LICENSE)
-[![Spec-Kit SDD](https://img.shields.io/badge/spec--kit-100%25-green)](spec.md)
+[![CI Pipeline](https://img.shields.io/badge/CI%2FCD-GitLab%20Pipeline-blue.svg)](https://code.swecha.org/mounikapatnaik/travel-information-and-guide)
+[![Pre-Commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![Python Version](https://img.shields.io/badge/Python-3.9+-yellow.svg?logo=python&logoColor=white)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-AGPLv3-red.svg)](LICENSE)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-TravelMate AI is a comprehensive, premium Streamlit-based travel companion application designed to help tourists understand countries and cities before visiting. The platform offers critical local regulations, safety instructions, transit rules, cultural dos & don'ts, recommended hotel stays, famous cuisines, and custom-tailored day-by-day travel planners.
+TravelMate AI is a comprehensive, Streamlit-based travel companion application designed to assist tourists in understanding countries and cities before visiting. The platform integrates emergency contact details, visa checklists, local laws, cultural dos and don'ts, recommended hotel stays, local cuisines, and personalized daily itinerary planners.
+
+It also integrates a context-aware **AI Travel Assistant**—a chatbot that queries a local SQLite database to provide instant answers to traveler questions.
 
 ---
 
-## 🏗️ System Architecture
+## 📌 Table of Contents
 
-The following Mermaid diagram illustrates how components flow inside the application, from the Streamlit views to the SQLite database and the Google Agent Development Kit (ADK) reasoning loop:
+1. [Features](#🚀-features)
+2. [Tech Stack](#🛠️-tech-stack)
+3. [Project Structure](#📂-project-structure)
+4. [Installation & Setup](#💻-installation--running-locally)
+5. [Testing & Quality Assurance](#🧪-testing--quality-assurance)
+6. [Pre-commit Hooks & Standards](#🪝-pre-commit-hooks--standards)
+7. [Repository Documentation Links](#📄-repository-documentation-links)
+8. [License](#📄-license)
 
-```mermaid
-graph TD
-    User([User Interface]) --> Streamlit[Streamlit Multipage UI]
-    Streamlit --> DB_Utils[utils/database.py]
-    DB_Utils --> SQLite[(SQLite travel.db)]
-    
-    Streamlit --> ChatbotPage[pages/chatbot.py]
-    ChatbotPage --> AgentCheck{GEMINI_API_KEY set?}
-    
-    %% Agent Kit Path
-    AgentCheck -- Yes (Agent Kit Active) --> ADK[utils/chatbot_agent.py]
-    ADK --> Agent[ADK Agent: travel_mate_agent]
-    Agent --> Runner[ADK Runner & Session Service]
-    Runner --> Tools[Agent Tools]
-    Tools --> |get_country_info| DB_Utils
-    Tools --> |get_city_info| DB_Utils
-    Tools --> |search_destinations| DB_Utils
-    
-    %% Fallback Path
-    AgentCheck -- No (Offline Fallback) --> RulesEngine[Rule-based Keyword Matcher]
-    RulesEngine --> DB_Utils
-    
-    RulesEngine --> |Response| ChatbotPage
-    Runner --> |Response Event Stream| ChatbotPage
+---
+
+## 🚀 Features
+
+* **Home Dashboard**: Beautiful hero header, featuring destination cards and a global search lookup across attractions, countries, capitals, and cuisines.
+* **Country Guide**: Local profiles detailing official languages, timezone information, currency, emergency contacts, visa check-lists, and cultural etiquette.
+* **City Explorer**: Rated tourist spots, localized vegetarian and non-vegetarian cuisines, and hotel accommodations segmented into budget, mid-range, and luxury.
+* **Smart Travel Planner**: Dynamic day-by-day itineraries (1-7 days) matched with budget visualizers utilizing interactive Plotly diagrams.
+* **AI Travel Assistant**: Multi-lingual (English, Hindi, Telugu) chatbot with smart context fallbacks linked to the active country/city selection.
+
+---
+
+## 🛠️ Tech Stack
+
+* **UI Framework**: Streamlit (v1.35.0+)
+* **Data Visualization**: Pandas, Plotly Express
+* **Database**: SQLite3 (Embedded Database)
+* **Styling**: Custom CSS and Google Fonts (Outfit)
+* **Linting & Code Quality**: Ruff, Mypy, Bandit, Vulture, Pylint, Flake8, Semgrep, Pyupgrade
+* **Security Scanning**: Gitleaks (Secret Scanning), pip-audit (Vulnerability Audit)
+* **Changelog Automation**: Git-Cliff (Conventional Commits)
+
+---
+
+## 📂 Project Structure
+
+```text
+TravelMate AI /
+├── .agents/                 # SpecKit agent configurations
+├── .specify/                # Spec-Driven Development rules & templates
+├── app.py                   # Main entry point and navigation setup
+├── database/
+│   └── travel.db            # Local SQLite database (initialized automatically)
+├── data/
+│   └── sample_data.py       # Seed dataset definitions
+├── pages/                   # Frontend view components
+│   ├── home.py              # Main landing dashboard
+│   ├── country_info.py      # Regulatory and cultural profiles
+│   ├── city_info.py         # Attractions and accommodation listings
+│   ├── planner.py           # Daily trip scheduler & budget chart
+│   └── chatbot.py           # Context-aware AI assistant
+├── utils/                   # Shared helpers and backend modules
+│   ├── database.py          # SQLite database connection & query APIs
+│   ├── i18n.py              # Internationalization & translation dictionary
+│   └── styles.py            # Global custom styling sheet & injections
+├── tests/                   # Spec-style test suite
+└── pyproject.toml           # Project metadata & configurations
 ```
-
----
-
-## 📊 Present Website Data (Supported Destinations)
-
-The platform is pre-seeded with a comprehensive dataset containing **3 countries** and **60 total destinations** (20 cities/neighborhoods per country) stored in a local SQLite database:
-
-### 🇮🇳 India (20 Cities)
-* **North India**: Delhi (Capital), Agra (Taj Mahal), Amritsar, Srinagar, Shimla
-* **South India**: Hyderabad, Visakhapatnam, Bangalore, Chennai, Kochi, Mysore
-* **West India**: Mumbai, Goa, Udaipur, Pune, Ahmedabad
-* **East India**: Kolkata, Darjeeling, Varanasi, Jaipur
-
-### 🇯🇵 Japan (20 Cities)
-* **Kanto & Kansai**: Tokyo (Capital), Yokohama, Kamakura, Nikko, Osaka, Kyoto, Nara, Kobe, Himeji
-* **Chubu & Tohoku**: Nagoya, Takayama, Matsumoto, Sendai
-* **Hokkaido (North)**: Sapporo, Hakodate
-* **Kyushu & Okinawa (South)**: Fukuoka, Nagasaki, Okinawa
-* **Chugoku & Ishikawa**: Hiroshima, Kanazawa
-
-### 🇸🇬 Singapore (20 Neighborhoods & Planning Areas)
-* **Central & Downtown**: Downtown Core (Capital), Marina Bay, Orchard Road, Chinatown, Little India, Sentosa Island, Novena, Bukit Timah
-* **East Coast & Regional**: Katong & Geylang, Tampines, Bedok, Changi, Serangoon, Ang Mo Kio, Woodlands, Jurong East, Queenstown, Punggol, Clementi, Yishun
-
----
-
-## 🚀 Key Features
-
-1. **Home Landing Page**:
-   - Beautifully styled hero header with custom font styling.
-   - Comprehensive **Search bar** to lookup countries, cities, tourist spots, or cuisines with one-click redirects.
-   - Dynamic **Destination Selector** for choosing countries and cities.
-   - Featured destinations showcase cards.
-
-2. **Country Information Guide**:
-   - Country profiles showing capitals, currencies, official languages, and time zones.
-   - Highlighted emergency numbers and contact details.
-   - Dedicated sections for **Visa and Pre-Departure checklists**, **Important Rules/Laws**, **Cultural Etiquette (Dos and Don'ts)**, and **Safety Tips**.
-
-3. **City Details Explorer**:
-   - Deep-dives into tourist attractions, rated out of 5 stars with optimal timing recommendations.
-   - Interactive sections for local dishes (vegetarian and non-vegetarian).
-   - Accommodation selections categorized into **Budget**, **Mid-range**, and **Luxury** options.
-   - Local transit guidelines, airport transfer suggestions, and localized city safety warnings.
-
-4. **Day-by-Day Travel Planner**:
-   - Customizable number of days (1-7 days) and budget levels.
-   - Generates morning, afternoon, and evening activity timelines.
-   - Recommends specific stays fitting the chosen budget.
-   - Dynamic localized budget calculator displaying expense breakdowns (Accommodation, Food, Transit, Sightseeing, Shopping).
-   - Interactive **Plotly Pie Chart** visualizing the cost allocation.
-
-5. **AI Travel Assistant (Google Agent Kit Integration)**:
-   - Conversational chatbot utilizing Streamlit's native chat elements.
-   - Powered by the **Google Agent Development Kit (ADK)** for advanced tool-calling and reasoning.
-   - If a `GEMINI_API_KEY` is present, the ADK Agent reasons and dynamically invokes tools (`get_country_info`, `get_city_info`, `search_destinations`) to answer queries.
-   - If `GEMINI_API_KEY` is missing, the app gracefully degrades to the **Offline Rule-Based Matcher** (matching queries with session states like selected city or country).
 
 ---
 
 ## 💻 Installation & Running Locally
 
 ### 1. Prerequisites
-Ensure you have **Python 3.9+** and **uv** (or pip) installed.
+Ensure you have **Python 3.9+** and `git` installed.
 
-### 2. Navigate to the Workspace
+### 2. Clone the Repository
 ```bash
-cd "travel-information-and-guide"
+git clone https://code.swecha.org/mounikapatnaik/travel-information-and-guide.git
+cd travel-information-and-guide
 ```
 
 ### 3. Install Dependencies
-Install the required packages:
 ```bash
-# Using uv (Recommended)
-uv pip install -r requirements.txt
-
-# Or using pip
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Configure Environment Variables
-Copy `.env.example` to `.env`:
-```bash
-cp .env.example .env
-```
-Fill in your `GEMINI_API_KEY` inside `.env` to enable the Agent Kit AI Assistant.
-
-### 5. Seed/Reset the Database
-The application automatically checks and initializes the database on startup. To manually seed or reset it, run:
-```bash
-python -m data.sample_data
-```
-
-### 6. Run the Test Suite
-Run the spec-style test suite with:
-```bash
-$env:PYTHONPATH="."; uv run --with pytest --with pytest-spec --with pytest-describe pytest
-```
-
-### 7. Launch the Application
-Run the Streamlit application:
+### 4. Running the Web Application
 ```bash
 streamlit run app.py
 ```
-Open the local URL displayed in the terminal (usually `http://localhost:8501`) in your web browser.
+This will open the local URL in your web browser (typically `http://localhost:8501`).
 
 ---
 
-## 🛠️ Code Quality & GitLab Compliance Integration
+## 🧪 Testing & Quality Assurance
 
-To satisfy GitLab Compliance requirements, this repository has been configured with the following audit tools:
+To execute the unit tests and check test coverage, run:
 
-1. **Formatters & Linters**:
-   - **Ruff**: Fast Python linter and formatter.
-   - **Flake8**: Standard formatting validator (configured in `.flake8`).
-   - **Pylint**: Deep code quality analyzer (configured in `pylintrc`).
-   - **Pyupgrade**: Automatically upgrades syntax for newer Python versions.
-
-2. **Type Checking & Quality**:
-   - **Mypy**: Optional static typing validator.
-   - **Vulture**: Dead code scanner (configured in `pyproject.toml`).
-
-3. **Security Auditing**:
-   - **Bandit**: Code security scanner (configured in `pyproject.toml`).
-   - **Gitleaks**: Prevents keys and secrets from being committed.
-   - **Pip-Audit**: Checks dependencies for known vulnerabilities.
-
-4. **Changelog Automation**:
-   - **Git-Cliff**: Automatically generates standard changelogs from conventional commits (configured in `cliff.toml`).
-
-### Local Quality Validation
-You can run all quality checks locally before pushing using `pre-commit`:
 ```bash
-pip install pre-commit
-pre-commit install
-pre-commit run --all-files
+# Run pytest with spec-style report format
+PYTHONPATH=. pytest
+
+# Run pytest with test coverage reports
+PYTHONPATH=. pytest --cov=. --cov-report=term-missing
 ```
 
 ---
 
-## 📌 GitLab Compliance Resolutions
+## 🪝 Pre-commit Hooks & Standards
 
-To clear the remaining GitLab Compliance warnings:
-- **❌ Description**: Go to your GitLab Project page, navigate to **Settings -> General**, and write a description under the "Project description" field.
-- **❌ Git Tags**: Create and push a git tag to trigger tags validation:
-  ```bash
-  git tag -a v1.0.0 -m "Release v1.0.0"
-  git push origin v1.0.0
-  ```
+This project enforces strict coding quality, format consistency, and security audits before every commit.
+
+### 1. Install Pre-commit
+Ensure pre-commit is installed and configured in your environment:
+```bash
+pre-commit install
+```
+
+### 2. Manual Pre-commit Check
+To run all configured quality, security, and format checks manually:
+```bash
+pre-commit run --all-files
+```
+
+### 3. Configured Checks
+* **Format & Lint**: `ruff` and `ruff-format`
+* **Static Analysis**: `mypy` (type-checking), `bandit` (security flaws), `pylint`, `flake8`
+* **Dead Code Detection**: `vulture`
+* **Secret Scanning**: `gitleaks` (prevents keys/passwords leaks)
+* **Vulnerabilities Audit**: `pip-audit` (audits packages against databases)
+* **Automated Changelog**: `git-cliff` (updates `CHANGELOG.md` using conventional commits)
+
+---
+
+## 📄 Repository Documentation Links
+
+For further information regarding project rules, contributions, security, or guidelines, refer to the following documents:
+
+* 📚 **[User Manual](USER_MANUAL.md)** — Guide on using the application features.
+* ⚙️ **[Setup Guide](docs/SETUP_GUIDE.md)** — Detailed system setup instructions.
+* 📐 **[Development Spec](spec.md)** — Core functionality specifications.
+* 🤝 **[Contributing Guidelines](CONTRIBUTING.md)** — How to contribute to this repository.
+* 🛡️ **[Security Policy](SECURITY.md)** — Security disclosure protocol.
+* 💬 **[Code of Conduct](CODE_OF_CONDUCT.md)** — Project community standards.
+* 🛠️ **[Support Page](SUPPORT.md)** — Getting assistance and reporting issues.
+
+---
+
+## 📄 License
+
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. For details, see the [LICENSE](LICENSE) file.
