@@ -47,11 +47,8 @@ with col_in3:
     economy_label = translate_ui("budget_economy")
     mid_range_label = translate_ui("budget_mid_range")
     luxury_label = translate_ui("budget_luxury")
-    
-    budget_tier = st.selectbox(
-        translate_ui("choose_budget_tier"),
-        [economy_label, mid_range_label, luxury_label]
-    )
+
+    budget_tier = st.selectbox(translate_ui("choose_budget_tier"), [economy_label, mid_range_label, luxury_label])
     # Simplify budget string key
     if budget_tier == economy_label:
         budget_key = "budget"
@@ -169,12 +166,16 @@ total_budget = accommodation_cost + food_cost + transport_cost + sightseeing_cos
 col_plan, col_budget = st.columns([3, 2])
 
 with col_plan:
-    st.markdown(translate_ui("custom_itinerary").format(days=num_days, city=city['city_name']))
+    st.markdown(translate_ui("custom_itinerary").format(days=num_days, city=city["city_name"]))
 
     # Hotel recommendation
-    hotel_suggestion = hotels.get(budget_key, {"name": "Local Stay", "desc": "Conveniently located accommodation.", "price": ""})
+    hotel_suggestion = hotels.get(
+        budget_key, {"name": "Local Stay", "desc": "Conveniently located accommodation.", "price": ""}
+    )
     rec_stay_lbl = translate_ui("recommended_stay_label").format(tier=budget_tier_display)
-    st.info(f"🏨 **{rec_stay_lbl}** **{hotel_suggestion['name']}**\n\n*{hotel_suggestion['desc']}* (Est: {hotel_suggestion.get('price', '')})")
+    st.info(
+        f"🏨 **{rec_stay_lbl}** **{hotel_suggestion['name']}**\n\n*{hotel_suggestion['desc']}* (Est: {hotel_suggestion.get('price', '')})"
+    )
     st.write("")
 
     # Distribute elements dynamically
@@ -198,22 +199,22 @@ with col_plan:
 
         # Details
         if morning_att:
-            morn_lbl = translate_ui("morning_activity").format(name=morning_att['name'])
+            morn_lbl = translate_ui("morning_activity").format(name=morning_att["name"])
             st.markdown(f"**{morn_lbl}**")
             st.caption(f"{morning_att['desc']} (Rating: {morning_att.get('rating', '4.5')})")
 
         if food_opt:
-            lunch_lbl = translate_ui("lunch_activity").format(name=food_opt['name'])
+            lunch_lbl = translate_ui("lunch_activity").format(name=food_opt["name"])
             st.markdown(f"**{lunch_lbl}**")
             st.caption(f"{food_opt['desc']}")
 
         if afternoon_att:
-            aft_lbl = translate_ui("afternoon_activity").format(name=afternoon_att['name'])
+            aft_lbl = translate_ui("afternoon_activity").format(name=afternoon_att["name"])
             st.markdown(f"**{aft_lbl}**")
             st.caption(f"{afternoon_att['desc']} (Rating: {afternoon_att.get('rating', '4.5')})")
 
         if shop_opt:
-            eve_lbl = translate_ui("evening_shop").format(name=shop_opt['name'])
+            eve_lbl = translate_ui("evening_shop").format(name=shop_opt["name"])
             st.markdown(f"**{eve_lbl}**")
             st.caption(f"{shop_opt['desc']}")
         else:
@@ -243,9 +244,9 @@ with col_budget:
             translate_ui("category_food"),
             translate_ui("category_transport"),
             translate_ui("category_sightseeing"),
-            translate_ui("category_shopping")
+            translate_ui("category_shopping"),
         ],
-        "Amount": [accommodation_cost, food_cost, transport_cost, sightseeing_cost, shopping_cost]
+        "Amount": [accommodation_cost, food_cost, transport_cost, sightseeing_cost, shopping_cost],
     }
     df_budget = pd.DataFrame(budget_data)
 
