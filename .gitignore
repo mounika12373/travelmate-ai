@@ -41,3 +41,15 @@ venv.bak/
 
 # Build artifacts
 *.egg-info/
+# macOS
+.DS_Store
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Pre-commit cache
+.cache/
+
+# Virtualenv cache
+Library/

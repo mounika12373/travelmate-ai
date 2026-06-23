@@ -52,3 +52,10 @@ repos:
     hooks:
       - id: semgrep
         additional_dependencies: ['setuptools<=80.10.2']
+<<<<<<< HEAD
+=======
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.20.0
+    hooks:
+    - id: pyupgrade    
+>>>>>>> 3d08bee (Remove cache files from repository and fix semgrep hook on Python 3.13)
