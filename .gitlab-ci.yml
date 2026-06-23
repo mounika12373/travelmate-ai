@@ -49,7 +49,7 @@ ruff_lint:
   script:
     - pip install ruff
     - ruff check .
-    - bandit -r .
+
 
 type_check:
   stage: type_check

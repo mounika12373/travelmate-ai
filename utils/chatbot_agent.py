@@ -162,8 +162,6 @@ async def run_agent_query_async(
     if context_str:
         full_prompt = f"[{context_str.strip()}]\n{query_text}"
 
-    from google.genai import types
-
     content = types.Content(role="user", parts=[types.Part(text=full_prompt)])
 
     final_response = ""
