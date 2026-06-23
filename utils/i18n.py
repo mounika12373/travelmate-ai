@@ -1119,7 +1119,7 @@ def translate_db_record(record, record_type):
                             foods[idx]["name"] = trans_foods[idx]["name"]
                             foods[idx]["desc"] = trans_foods[idx]["desc"]
                     translated["food_info"] = json.dumps(foods)
-                except Exception:
+                except (json.JSONDecodeError, KeyError, TypeError, IndexError):
                     pass
 
             if "tourist_places" in record:
@@ -1131,7 +1131,7 @@ def translate_db_record(record, record_type):
                             places[idx]["name"] = trans_places[idx]["name"]
                             places[idx]["desc"] = trans_places[idx]["desc"]
                     translated["tourist_places"] = json.dumps(places)
-                except Exception:
+                except (json.JSONDecodeError, KeyError, TypeError, IndexError):
                     pass
 
             if "hotel_info" in record:
@@ -1145,7 +1145,7 @@ def translate_db_record(record, record_type):
                             if "price" in trans_hotels[tier]:
                                 hotels[tier]["price"] = trans_hotels[tier]["price"]
                     translated["hotel_info"] = json.dumps(hotels)
-                except Exception:
+                except (json.JSONDecodeError, KeyError, TypeError, IndexError):
                     pass
 
             if "shopping_areas" in record:
@@ -1157,7 +1157,7 @@ def translate_db_record(record, record_type):
                             shops[idx]["name"] = trans_shops[idx]["name"]
                             shops[idx]["desc"] = trans_shops[idx]["desc"]
                     translated["shopping_areas"] = json.dumps(shops)
-                except Exception:
+                except (json.JSONDecodeError, KeyError, TypeError, IndexError):
                     pass
         else:
             # Fallback: Translate the city name if we have a simple map
