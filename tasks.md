@@ -13,9 +13,9 @@
 **Purpose**: Setup the foundations for Python package metadata, style checks, and environment configurations.
 
 - [x] T001 Initialize SpecKit project structure (`.specify/` configuration & agent skills)
-- [ ] T002 Configure Python linting rules in `ruff.toml`
-- [ ] T003 Configure Python project metadata and test tool options in `pyproject.toml`
-- [ ] T004 Create template env configuration file `.env.example`
+- [x] T002 Configure Python linting rules in `ruff.toml`
+- [x] T003 Configure Python project metadata and test tool options in `pyproject.toml`
+- [x] T004 Create template env configuration file `.env.example`
 
 ---
 
@@ -69,9 +69,9 @@
 
 **Purpose**: Validate utility modules, routing, and bot parser.
 
-- [ ] T016 Implement unit tests for style helper functions (`tests/test_styles_spec.py`)
-- [ ] T017 Implement unit tests for chatbot response parsing and fallbacks (`tests/test_chatbot_spec.py`)
-- [ ] T018 Implement unit tests for app config and routing elements (`tests/test_app_spec.py`)
+- [x] T016 Implement unit tests for style helper functions (`tests/test_styles_spec.py`)
+- [x] T017 Implement unit tests for chatbot response parsing and fallbacks (`tests/test_chatbot_spec.py`)
+- [x] T018 Implement unit tests for app config and routing elements (`tests/test_app_spec.py`)
 
 ---
 
@@ -79,12 +79,12 @@
 
 **Purpose**: Automate linting and test execution on push.
 
-- [ ] T019 Create `.gitlab-ci.yml` pipeline containing ruff lint checks and pytest runs
+- [x] T019 Create `.gitlab-ci.yml` pipeline containing ruff lint checks and pytest runs
 
 ---
 
 ## Phase 9: Verification
 
-- [ ] T020 Run localized test suite execution (`pytest`)
-- [ ] T021 Run code style enforcement checks (`ruff check .`)
+- [x] T020 Run localized test suite execution (`pytest`)
+- [x] T021 Run code style enforcement checks (`ruff check .`)
 - [ ] T022 Commit and push changes to GitLab remote repository
