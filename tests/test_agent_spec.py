@@ -1,7 +1,8 @@
-from unittest.mock import MagicMock, AsyncMock, patch
-import pytest
-from utils import database as db
+from unittest.mock import MagicMock, patch
+
 from utils import chatbot_agent as agent
+from utils import database as db
+
 
 def setup_temp_db(monkeypatch, tmp_path):
     temp_dir = tmp_path / "database"
@@ -10,6 +11,7 @@ def setup_temp_db(monkeypatch, tmp_path):
     monkeypatch.setattr(db, "DB_PATH", str(temp_db))
     db.init_db()
     return db
+
 
 def describe_agent_kit_tools():
     def it_gets_country_info_from_db(monkeypatch, tmp_path):
@@ -43,6 +45,7 @@ def describe_agent_kit_tools():
         res = agent.search_destinations("Singapore")
         assert len(res["countries"]) > 0 or len(res["cities"]) > 0
 
+
 def describe_agent_kit_status():
     def it_is_disabled_when_adk_is_unavailable():
         with patch.object(agent, "ADK_AVAILABLE", False):
@@ -60,24 +63,25 @@ def describe_agent_kit_status():
             with patch("utils.chatbot_agent.get_agent_runner", return_value=mock_runner):
                 assert agent.is_agent_enabled()
 
+
 def describe_agent_query_execution():
     def it_executes_agent_runner_loop(monkeypatch, tmp_path):
         setup_temp_db(monkeypatch, tmp_path)
-        
+
         # Mock Event and Runner
         mock_event = MagicMock()
         mock_event.is_final_response.return_value = True
         mock_part = MagicMock()
         mock_part.text = "Hello traveler! I recommend visiting Kyoto."
         mock_event.content.parts = [mock_part]
-        
+
         # Set up an async generator mock for run_async
-        async def mock_run_async(*args, **kwargs):
+        async def mock_run_async(*_args, **_kwargs):
             yield mock_event
-            
+
         mock_runner = MagicMock()
         mock_runner.run_async = mock_run_async
-        
+
         with patch("utils.chatbot_agent.get_agent_runner", return_value=mock_runner):
             with patch("utils.chatbot_agent.ADK_AVAILABLE", True):
                 # Test the sync wrapper
@@ -86,6 +90,6 @@ def describe_agent_query_execution():
                     session_id="en",
                     query_text="Where should I go in Japan?",
                     active_country_id=None,
-                    active_city_id=None
+                    active_city_id=None,
                 )
                 assert res == "Hello traveler! I recommend visiting Kyoto."

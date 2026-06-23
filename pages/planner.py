@@ -284,46 +284,53 @@ current_combination = f"{city_id}_{num_days}_{budget_key}"
 if st.session_state.get("last_logged_itinerary_combination") != current_combination:
     if st.session_state.get("user"):
         from utils.database import log_activity
+
         details_log = {
             "days": num_days,
             "budget_tier": budget_tier_display,
             "city_id": city_id,
             "itinerary_text": f"Generated {num_days} Days itinerary in {city['city_name']} ({budget_tier_display}).",
-            "budget_breakdown": budget_data
+            "budget_breakdown": budget_data,
         }
-        log_activity(st.session_state.user["id"], "itinerary", f"{num_days} Days in {city['city_name']} ({budget_tier_display})", details_log)
+        log_activity(
+            st.session_state.user["id"],
+            "itinerary",
+            f"{num_days} Days in {city['city_name']} ({budget_tier_display})",
+            details_log,
+        )
     st.session_state.last_logged_itinerary_combination = current_combination
 
 # Save to Collection Form (Available for Authenticated Users)
 if st.session_state.get("user"):
     from datetime import date
+
     with col_budget:
         st.divider()
         st.markdown("### 💾 Save to Travel Collections")
-        from utils.database import save_trip, get_saved_trips
-        
+        from utils.database import get_saved_trips, save_trip
+
         saved_trips = get_saved_trips(st.session_state.user["id"])
-        collections = list(set([t["collection_name"] for t in saved_trips]))
+        collections = list({t["collection_name"] for t in saved_trips})
         if "My Saved Trips" not in collections:
             collections.append("My Saved Trips")
-            
+
         with st.form("save_itinerary_form"):
             target_col = st.selectbox("Select Collection Folder", collections)
             custom_col_name = st.text_input("Or create a new collection", placeholder="e.g. Summer Kyoto 2026")
             travel_date_val = st.date_input("Select travel date", value=date.today())
-            
+
             save_it_btn = st.form_submit_button("Save Trip, Hotel & Flights")
-            
+
             if save_it_btn:
                 col_name = custom_col_name.strip() if custom_col_name.strip() else target_col
-                
+
                 # 1. Save Itinerary
                 it_details = {
                     "days": num_days,
                     "budget_tier": budget_tier_display,
                     "city_id": city_id,
                     "itinerary_text": f"Itinerary for {num_days} days in {city['city_name']} ({budget_tier_display})",
-                    "budget_breakdown": budget_data
+                    "budget_breakdown": budget_data,
                 }
                 save_trip(
                     user_id=st.session_state.user["id"],
@@ -331,36 +338,35 @@ if st.session_state.get("user"):
                     name=f"{num_days} Days in {city['city_name']}",
                     collection_name=col_name,
                     details=it_details,
-                    travel_date=travel_date_val.strftime("%Y-%m-%d")
+                    travel_date=travel_date_val.strftime("%Y-%m-%d"),
                 )
-                
+
                 # 2. Save Recommended Hotel
-                hotel_details = {
-                    "desc": hotel_suggestion.get("desc", ""),
-                    "price": hotel_suggestion.get("price", "")
-                }
+                hotel_details = {"desc": hotel_suggestion.get("desc", ""), "price": hotel_suggestion.get("price", "")}
                 save_trip(
                     user_id=st.session_state.user["id"],
                     trip_type="hotel",
                     name=hotel_suggestion["name"],
                     collection_name=col_name,
-                    details=hotel_details
+                    details=hotel_details,
                 )
-                
+
                 # 3. Save Flight Recommendation
                 flight_details = {
                     "airline": "TravelMate AI Charter",
                     "departure_time": "09:30 AM",
                     "arrival_time": "12:15 PM",
-                    "price": "S$ 220" if currency_code == "SGD" else ("₹ 9,000" if currency_code == "INR" else "¥ 24,000")
+                    "price": "S$ 220"
+                    if currency_code == "SGD"
+                    else ("₹ 9,000" if currency_code == "INR" else "¥ 24,000"),
                 }
                 save_trip(
                     user_id=st.session_state.user["id"],
                     trip_type="flight",
                     name=f"Flight to {city['city_name']}",
                     collection_name=col_name,
-                    details=flight_details
+                    details=flight_details,
                 )
-                
+
                 st.success(f"Successfully saved to '{col_name}'!")
                 st.rerun()

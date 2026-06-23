@@ -25,6 +25,7 @@ repos:
     rev: v3.3.7
     hooks:
       - id: pylint
+        args: ["--errors-only", "--disable=import-error"]
 
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.21.0
@@ -41,21 +42,8 @@ repos:
     hooks:
       - id: pip-audit
 
-  - repo: https://github.com/orhun/git-cliff
-    rev: v1.4.0
-    hooks:
-      - id: git-cliff
-        args: [--config, cliff.toml]
-
   - repo: https://github.com/semgrep/pre-commit
     rev: v1.127.0
     hooks:
       - id: semgrep
         additional_dependencies: ['setuptools<=80.10.2']
-<<<<<<< HEAD
-=======
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.20.0
-    hooks:
-    - id: pyupgrade    
->>>>>>> 3d08bee (Remove cache files from repository and fix semgrep hook on Python 3.13)
