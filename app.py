@@ -32,6 +32,7 @@ if "auth_token" not in st.session_state:
 # Auto login check from remember_me_token in session state
 if not st.session_state.user and st.session_state.get("remember_me_token"):
     from utils.auth_utils import decode_jwt
+
     payload = decode_jwt(st.session_state.remember_me_token)
     if payload:
         st.session_state.user = payload
@@ -41,42 +42,41 @@ if st.session_state.get("user"):
     user = st.session_state.user
     avatar = user.get("profile_pic")
     if not avatar:
-        avatar = "https://www.w3schools.com/howto/img_avatar.png" # default avatar URL
-    
-    render_html(f"""
+        avatar = "https://www.w3schools.com/howto/img_avatar.png"  # default avatar URL
+
+    render_html(
+        f"""
         <div style='text-align: center; padding: 10px 0;'>
             <h2 style='margin:0; font-weight:800; color:var(--primary-color); font-size:1.8rem;'>✈️ TravelMate AI</h2>
             <div style='display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; padding: 8px; background: rgba(128,128,128,0.08); border-radius: 12px; border: 1px solid rgba(128,128,128,0.15);'>
                 <img src='{avatar}' style='width: 32px; height: 32px; border-radius: 50%; object-fit: cover;'>
                 <div style='text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;'>
-                    <div style='font-size: 0.85rem; font-weight: 700; color: var(--text-color);'>{user['full_name']}</div>
-                    <div style='font-size: 0.75rem; color: gray;'>{user['email']}</div>
+                    <div style='font-size: 0.85rem; font-weight: 700; color: var(--text-color);'>{user["full_name"]}</div>
+                    <div style='font-size: 0.75rem; color: gray;'>{user["email"]}</div>
                 </div>
             </div>
         </div>
         <hr style='margin-top:10px; margin-bottom:15px; border-color:rgba(128,128,128,0.2);'>
-    """, sidebar=True)
+    """,
+        sidebar=True,
+    )
 else:
-    render_html(f"""
+    render_html(
+        f"""
         <div style='text-align: center; padding: 10px 0;'>
             <h2 style='margin:0; font-weight:800; color:var(--primary-color); font-size:1.8rem;'>✈️ TravelMate AI</h2>
             <p style='color:gray; font-size:0.85rem; margin-top:5px;'>{translate_ui("app_subtitle")}</p>
         </div>
         <hr style='margin-top:0; margin-bottom:15px; border-color:rgba(128,128,128,0.2);'>
-    """, sidebar=True)
+    """,
+        sidebar=True,
+    )
 
 # Global Language Selector in Sidebar
 selected_lang = st.sidebar.selectbox(
-    "🌐 Language / भाषा / భాష",
-    ["English", "Hindi (हिन्दी)", "Telugu (తెలుగు)"],
-    index=0,
-    key="language_selector_ui"
+    "🌐 Language / भाषा / భాష", ["English", "Hindi (हिन्दी)", "Telugu (తెలుగు)"], index=0, key="language_selector_ui"
 )
-lang_map = {
-    "English": "en",
-    "Hindi (हिन्दी)": "hi",
-    "Telugu (తెలుగు)": "te"
-}
+lang_map = {"English": "en", "Hindi (हिन्दी)": "hi", "Telugu (తెలుగు)": "te"}
 st.session_state.language = lang_map.get(selected_lang, "en")
 
 # Initialize session state for cross-page navigation
@@ -120,7 +120,7 @@ auth_page = st.Page("pages/auth.py", title="Login / Register", icon="🔐")
 # Create Navigation groups
 nav_dict = {
     translate_ui("explore"): [home_page, country_page, city_page],
-    translate_ui("plan_ask"): [planner_page, chatbot_page]
+    translate_ui("plan_ask"): [planner_page, chatbot_page],
 }
 
 if st.session_state.user:
