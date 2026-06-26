@@ -10,6 +10,7 @@ def setup_temp_db(monkeypatch, tmp_path):
     db.init_db()
     return db
 
+
 def describe_chatbot_response():
     def it_handles_greeting_fallback_when_no_match(monkeypatch, tmp_path):
         setup_temp_db(monkeypatch, tmp_path)
@@ -59,3 +60,20 @@ def describe_chatbot_response():
         setup_temp_db(monkeypatch, tmp_path)
         response = generate_bot_response("Visa guidelines for Japan", None, None)
         assert "Visa & Entry information for Japan" in response
+
+    def it_responds_with_weather_info_for_matched_city(monkeypatch, tmp_path):
+        setup_temp_db(monkeypatch, tmp_path)
+        response = generate_bot_response("How is the weather in Tokyo?", None, None)
+        assert "Weather & Best Time to Visit Tokyo" in response
+
+    def it_responds_with_weather_info_for_matched_city_and_month(monkeypatch, tmp_path):
+        setup_temp_db(monkeypatch, tmp_path)
+        response = generate_bot_response("What is the temperature in Hyderabad in October?", None, None)
+        assert "Weather & Best Time to Visit Hyderabad" in response
+        assert "October" in response
+
+    def it_falls_back_to_capital_weather_for_country(monkeypatch, tmp_path):
+        setup_temp_db(monkeypatch, tmp_path)
+        response = generate_bot_response("What is the climate in Japan?", None, None)
+        assert "Weather in Japan" in response
+        assert "Tokyo" in response

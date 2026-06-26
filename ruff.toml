@@ -2,6 +2,7 @@
 line-length = 120
 indent-width = 4
 target-version = "py38"
+exclude = ["gitlab-runner", ".venv", "build", "dist"]
 
 [lint]
 # Enable Pyflakes (F), Pycodestyle (E, W), and Isort (I)

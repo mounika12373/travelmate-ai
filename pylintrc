@@ -1,5 +1,5 @@
 [MASTER]
-ignore=CVS
+ignore=CVS,gitlab-runner
 ignore-patterns=
 persistent=yes
 load-plugins=

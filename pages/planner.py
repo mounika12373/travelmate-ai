@@ -17,12 +17,9 @@ all_cities = []
 for c in countries:
     cities = get_cities_by_country(c["id"])
     for ct in cities:
-        all_cities.append({
-            "id": ct["id"],
-            "city_name": ct["city_name"],
-            "country_name": c["country_name"],
-            "country_id": c["id"]
-        })
+        all_cities.append(
+            {"id": ct["id"], "city_name": ct["city_name"], "country_name": c["country_name"], "country_id": c["id"]}
+        )
 
 if not all_cities:
     st.error(translate_ui("no_cities_warning"))
@@ -50,11 +47,8 @@ with col_in3:
     economy_label = translate_ui("budget_economy")
     mid_range_label = translate_ui("budget_mid_range")
     luxury_label = translate_ui("budget_luxury")
-    
-    budget_tier = st.selectbox(
-        translate_ui("choose_budget_tier"),
-        [economy_label, mid_range_label, luxury_label]
-    )
+
+    budget_tier = st.selectbox(translate_ui("choose_budget_tier"), [economy_label, mid_range_label, luxury_label])
     # Simplify budget string key
     if budget_tier == economy_label:
         budget_key = "budget"
@@ -92,7 +86,7 @@ except Exception:
 # Dynamic Budget calculations
 currency_symbol = "S$"
 currency_code = "SGD"
-base_daily_rates = {} # Rates in local currency
+base_daily_rates = {}  # Rates in local currency
 
 # Note: country name might be returned translated! Check orig name or check both
 c_name_lower = country["country_name"].lower()
@@ -105,21 +99,51 @@ if is_india:
     if budget_key == "budget":
         base_daily_rates = {"accommodation": 3000, "food": 1000, "transport": 400, "sightseeing": 500, "shopping": 600}
     elif budget_key == "mid_range":
-        base_daily_rates = {"accommodation": 7500, "food": 2500, "transport": 1200, "sightseeing": 1500, "shopping": 2000}
+        base_daily_rates = {
+            "accommodation": 7500,
+            "food": 2500,
+            "transport": 1200,
+            "sightseeing": 1500,
+            "shopping": 2000,
+        }
     else:
-        base_daily_rates = {"accommodation": 25000, "food": 6000, "transport": 4000, "sightseeing": 4000, "shopping": 8000}
+        base_daily_rates = {
+            "accommodation": 25000,
+            "food": 6000,
+            "transport": 4000,
+            "sightseeing": 4000,
+            "shopping": 8000,
+        }
 
 elif is_japan:
     currency_symbol = "¥"
     currency_code = "JPY"
     if budget_key == "budget":
-        base_daily_rates = {"accommodation": 6500, "food": 3000, "transport": 1000, "sightseeing": 1500, "shopping": 1500}
+        base_daily_rates = {
+            "accommodation": 6500,
+            "food": 3000,
+            "transport": 1000,
+            "sightseeing": 1500,
+            "shopping": 1500,
+        }
     elif budget_key == "mid_range":
-        base_daily_rates = {"accommodation": 22000, "food": 8000, "transport": 2500, "sightseeing": 4000, "shopping": 5000}
+        base_daily_rates = {
+            "accommodation": 22000,
+            "food": 8000,
+            "transport": 2500,
+            "sightseeing": 4000,
+            "shopping": 5000,
+        }
     else:
-        base_daily_rates = {"accommodation": 80000, "food": 20000, "transport": 10000, "sightseeing": 12000, "shopping": 15000}
+        base_daily_rates = {
+            "accommodation": 80000,
+            "food": 20000,
+            "transport": 10000,
+            "sightseeing": 12000,
+            "shopping": 15000,
+        }
 
-else: # Singapore
+else:  # Singapore
     currency_symbol = "S$"
     currency_code = "SGD"
     if budget_key == "budget":
@@ -142,12 +166,16 @@ total_budget = accommodation_cost + food_cost + transport_cost + sightseeing_cos
 col_plan, col_budget = st.columns([3, 2])
 
 with col_plan:
-    st.markdown(translate_ui("custom_itinerary").format(days=num_days, city=city['city_name']))
+    st.markdown(translate_ui("custom_itinerary").format(days=num_days, city=city["city_name"]))
 
     # Hotel recommendation
-    hotel_suggestion = hotels.get(budget_key, {"name": "Local Stay", "desc": "Conveniently located accommodation.", "price": ""})
+    hotel_suggestion = hotels.get(
+        budget_key, {"name": "Local Stay", "desc": "Conveniently located accommodation.", "price": ""}
+    )
     rec_stay_lbl = translate_ui("recommended_stay_label").format(tier=budget_tier_display)
-    st.info(f"🏨 **{rec_stay_lbl}** **{hotel_suggestion['name']}**\n\n*{hotel_suggestion['desc']}* (Est: {hotel_suggestion.get('price', '')})")
+    st.info(
+        f"🏨 **{rec_stay_lbl}** **{hotel_suggestion['name']}**\n\n*{hotel_suggestion['desc']}* (Est: {hotel_suggestion.get('price', '')})"
+    )
     st.write("")
 
     # Distribute elements dynamically
@@ -160,7 +188,7 @@ with col_plan:
         """)
 
         # Determine morning/afternoon attractions based on index
-        attract_indices = [(day*2 - 2) % len(attractions), (day*2 - 1) % len(attractions)] if attractions else []
+        attract_indices = [(day * 2 - 2) % len(attractions), (day * 2 - 1) % len(attractions)] if attractions else []
         morning_att = attractions[attract_indices[0]] if len(attract_indices) > 0 and attractions else None
         afternoon_att = attractions[attract_indices[1]] if len(attract_indices) > 1 and attractions else None
 
@@ -171,22 +199,22 @@ with col_plan:
 
         # Details
         if morning_att:
-            morn_lbl = translate_ui("morning_activity").format(name=morning_att['name'])
+            morn_lbl = translate_ui("morning_activity").format(name=morning_att["name"])
             st.markdown(f"**{morn_lbl}**")
             st.caption(f"{morning_att['desc']} (Rating: {morning_att.get('rating', '4.5')})")
 
         if food_opt:
-            lunch_lbl = translate_ui("lunch_activity").format(name=food_opt['name'])
+            lunch_lbl = translate_ui("lunch_activity").format(name=food_opt["name"])
             st.markdown(f"**{lunch_lbl}**")
             st.caption(f"{food_opt['desc']}")
 
         if afternoon_att:
-            aft_lbl = translate_ui("afternoon_activity").format(name=afternoon_att['name'])
+            aft_lbl = translate_ui("afternoon_activity").format(name=afternoon_att["name"])
             st.markdown(f"**{aft_lbl}**")
             st.caption(f"{afternoon_att['desc']} (Rating: {afternoon_att.get('rating', '4.5')})")
 
         if shop_opt:
-            eve_lbl = translate_ui("evening_shop").format(name=shop_opt['name'])
+            eve_lbl = translate_ui("evening_shop").format(name=shop_opt["name"])
             st.markdown(f"**{eve_lbl}**")
             st.caption(f"{shop_opt['desc']}")
         else:
@@ -216,9 +244,9 @@ with col_budget:
             translate_ui("category_food"),
             translate_ui("category_transport"),
             translate_ui("category_sightseeing"),
-            translate_ui("category_shopping")
+            translate_ui("category_shopping"),
         ],
-        "Amount": [accommodation_cost, food_cost, transport_cost, sightseeing_cost, shopping_cost]
+        "Amount": [accommodation_cost, food_cost, transport_cost, sightseeing_cost, shopping_cost],
     }
     df_budget = pd.DataFrame(budget_data)
 
@@ -228,13 +256,13 @@ with col_budget:
         values="Amount",
         names="Expense Category",
         color_discrete_sequence=px.colors.qualitative.Pastel,
-        hole=0.4
+        hole=0.4,
     )
     fig.update_layout(
         margin=dict(t=0, b=0, l=0, r=0),
         legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5),
         paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)"
+        plot_bgcolor="rgba(0,0,0,0)",
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -256,46 +284,53 @@ current_combination = f"{city_id}_{num_days}_{budget_key}"
 if st.session_state.get("last_logged_itinerary_combination") != current_combination:
     if st.session_state.get("user"):
         from utils.database import log_activity
+
         details_log = {
             "days": num_days,
             "budget_tier": budget_tier_display,
             "city_id": city_id,
             "itinerary_text": f"Generated {num_days} Days itinerary in {city['city_name']} ({budget_tier_display}).",
-            "budget_breakdown": budget_data
+            "budget_breakdown": budget_data,
         }
-        log_activity(st.session_state.user["id"], "itinerary", f"{num_days} Days in {city['city_name']} ({budget_tier_display})", details_log)
+        log_activity(
+            st.session_state.user["id"],
+            "itinerary",
+            f"{num_days} Days in {city['city_name']} ({budget_tier_display})",
+            details_log,
+        )
     st.session_state.last_logged_itinerary_combination = current_combination
 
 # Save to Collection Form (Available for Authenticated Users)
 if st.session_state.get("user"):
     from datetime import date
+
     with col_budget:
         st.divider()
         st.markdown("### 💾 Save to Travel Collections")
-        from utils.database import save_trip, get_saved_trips
-        
+        from utils.database import get_saved_trips, save_trip
+
         saved_trips = get_saved_trips(st.session_state.user["id"])
         collections = list(set([t["collection_name"] for t in saved_trips]))
         if "My Saved Trips" not in collections:
             collections.append("My Saved Trips")
-            
+
         with st.form("save_itinerary_form"):
             target_col = st.selectbox("Select Collection Folder", collections)
             custom_col_name = st.text_input("Or create a new collection", placeholder="e.g. Summer Kyoto 2026")
             travel_date_val = st.date_input("Select travel date", value=date.today())
-            
+
             save_it_btn = st.form_submit_button("Save Trip, Hotel & Flights")
-            
+
             if save_it_btn:
                 col_name = custom_col_name.strip() if custom_col_name.strip() else target_col
-                
+
                 # 1. Save Itinerary
                 it_details = {
                     "days": num_days,
                     "budget_tier": budget_tier_display,
                     "city_id": city_id,
                     "itinerary_text": f"Itinerary for {num_days} days in {city['city_name']} ({budget_tier_display})",
-                    "budget_breakdown": budget_data
+                    "budget_breakdown": budget_data,
                 }
                 save_trip(
                     user_id=st.session_state.user["id"],
@@ -303,36 +338,35 @@ if st.session_state.get("user"):
                     name=f"{num_days} Days in {city['city_name']}",
                     collection_name=col_name,
                     details=it_details,
-                    travel_date=travel_date_val.strftime("%Y-%m-%d")
+                    travel_date=travel_date_val.strftime("%Y-%m-%d"),
                 )
-                
+
                 # 2. Save Recommended Hotel
-                hotel_details = {
-                    "desc": hotel_suggestion.get("desc", ""),
-                    "price": hotel_suggestion.get("price", "")
-                }
+                hotel_details = {"desc": hotel_suggestion.get("desc", ""), "price": hotel_suggestion.get("price", "")}
                 save_trip(
                     user_id=st.session_state.user["id"],
                     trip_type="hotel",
                     name=hotel_suggestion["name"],
                     collection_name=col_name,
-                    details=hotel_details
+                    details=hotel_details,
                 )
-                
+
                 # 3. Save Flight Recommendation
                 flight_details = {
                     "airline": "TravelMate AI Charter",
                     "departure_time": "09:30 AM",
                     "arrival_time": "12:15 PM",
-                    "price": "S$ 220" if currency_code == "SGD" else ("₹ 9,000" if currency_code == "INR" else "¥ 24,000")
+                    "price": "S$ 220"
+                    if currency_code == "SGD"
+                    else ("₹ 9,000" if currency_code == "INR" else "¥ 24,000"),
                 }
                 save_trip(
                     user_id=st.session_state.user["id"],
                     trip_type="flight",
                     name=f"Flight to {city['city_name']}",
                     collection_name=col_name,
-                    details=flight_details
+                    details=flight_details,
                 )
-                
+
                 st.success(f"Successfully saved to '{col_name}'!")
                 st.rerun()

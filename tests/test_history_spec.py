@@ -1,6 +1,7 @@
-import os
 import json
+
 from utils import database as db
+
 
 def setup_temp_db(monkeypatch, tmp_path):
     temp_dir = tmp_path / "database"
@@ -8,6 +9,7 @@ def setup_temp_db(monkeypatch, tmp_path):
     monkeypatch.setattr(db, "DB_DIR", str(temp_dir))
     monkeypatch.setattr(db, "DB_PATH", str(temp_db))
     return db
+
 
 def describe_history_and_profile():
     def it_creates_users_and_verifies_profile_updates(monkeypatch, tmp_path):
@@ -24,7 +26,7 @@ def describe_history_and_profile():
             city="Hyderabad",
             profile_pic="data:image/png;base64,xxxx",
             password_hash="hashed_test_password",
-            preferences="[]"
+            preferences="[]",
         )
         assert user_id is not None
 
@@ -42,9 +44,9 @@ def describe_history_and_profile():
             country="India",
             city="Secunderabad",
             profile_pic="data:image/png;base64,yyyy",
-            preferences='["Adventure"]'
+            preferences='["Adventure"]',
         )
-        
+
         user_updated = db_module.get_user_by_id(user_id)
         assert user_updated["full_name"] == "Updated User"
         assert user_updated["city"] == "Secunderabad"
@@ -55,7 +57,7 @@ def describe_history_and_profile():
         db_module.init_db()
 
         user_id = db_module.create_user("User", "user@example.com", "123", "India", "Visakhapatnam", "", "pwd")
-        
+
         # Log searches and itineraries
         db_module.log_activity(user_id, "search", "Kyoto")
         db_module.log_activity(user_id, "itinerary", "Tokyo 3 Days Plan", {"days": 3, "budget": "mid_range"})
@@ -88,10 +90,17 @@ def describe_history_and_profile():
         db_module.init_db()
 
         user_id = db_module.create_user("Analyst", "analyst@example.com", "123", "Japan", "Tokyo", "", "pwd")
-        
+
         # Save destination and itinerary
         db_module.save_trip(user_id, "destination", "Kyoto", "My Saved Trips", {"city_id": 3})
-        db_module.save_trip(user_id, "itinerary", "3 Days in Hyderabad", "Summer Vacation 2026", {"days": 3, "budget_tier": "Economy"}, "2026-07-15")
+        db_module.save_trip(
+            user_id,
+            "itinerary",
+            "3 Days in Hyderabad",
+            "Summer Vacation 2026",
+            {"days": 3, "budget_tier": "Economy"},
+            "2026-07-15",
+        )
 
         # Log search activities to affect dashboard
         db_module.log_activity(user_id, "search", "Hyderabad")

@@ -41,7 +41,7 @@ python_files = ["test_*.py"]
 packages = []
 
 [tool.vulture]
-exclude = [".venv"]
+exclude = [".venv", "gitlab-runner"]
 ignore_decorators = []
 ignore_names = []
 make_whitelist = false

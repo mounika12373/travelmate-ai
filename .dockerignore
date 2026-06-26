@@ -9,3 +9,5 @@ __pycache__
 database/travel.db
 .cache
 .pytest_cache
+gitlab-runner/
+
