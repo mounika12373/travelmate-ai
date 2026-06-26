@@ -95,7 +95,7 @@ with tab_visa:
     st.info(country["visa_info"])
 
     st.markdown(translate_ui("pre_departure_checklist"))
-    is_sg = country["country_name"].lower() in ["singapore", "सिंगापुर", "సింగపూర్"]
+    is_sg = country["country_name"].lower() in ["singapore", "సింగపూర్", "सिंगापुर"]
     visa_form_msg = translate_ui("checklist_visa_sg") if is_sg else translate_ui("checklist_visa_evisa")
     st.markdown(f"""
     - [ ] {translate_ui("checklist_passport")}
@@ -147,6 +147,7 @@ with tab_safety:
 st.divider()
 st.subheader(translate_ui("cities_in_country").format(country=country["country_name"]))
 cities = get_cities_by_country(country["id"])
+
 if cities:
     cols_per_row = 4
     for i in range(0, len(cities), cols_per_row):

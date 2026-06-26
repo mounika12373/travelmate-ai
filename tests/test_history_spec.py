@@ -25,7 +25,7 @@ def describe_history_and_profile():
             country="India",
             city="Hyderabad",
             profile_pic="data:image/png;base64,xxxx",
-            password_hash="hashed_test_password",
+            password_hash="hashed_test_password",  # nosec B106
             preferences="[]",
         )
         assert user_id is not None

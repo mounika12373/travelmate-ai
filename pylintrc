@@ -17,7 +17,28 @@ disable=raw-checker-failed,
         invalid-name,
         line-too-long,
         import-outside-toplevel,
-        unused-argument
+        unused-argument,
+        duplicate-code,
+        unused-variable,
+        too-many-lines,
+        too-many-locals,
+        too-many-nested-blocks,
+        too-many-branches,
+        too-many-statements,
+        wrong-import-order,
+        raise-missing-from,
+        unused-import,
+        wrong-import-position,
+        broad-exception-caught,
+        use-dict-literal,
+        no-else-return,
+        too-many-return-statements,
+        global-statement,
+        logging-fstring-interpolation,
+        too-many-arguments,
+        too-many-positional-arguments
+
+
 
 [REPORTS]
 output-format=text

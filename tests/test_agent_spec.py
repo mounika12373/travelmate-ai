@@ -76,7 +76,7 @@ def describe_agent_query_execution():
         mock_event.content.parts = [mock_part]
 
         # Set up an async generator mock for run_async
-        async def mock_run_async(*args, **kwargs):
+        async def mock_run_async(*_args, **_kwargs):
             yield mock_event
 
         mock_runner = MagicMock()

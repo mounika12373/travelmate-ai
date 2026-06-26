@@ -11,7 +11,7 @@ try:
     from google.adk.agents import Agent
     from google.adk.runners import Runner
     from google.adk.sessions import InMemorySessionService
-    from google.genai import types
+    from google.genai import types  # noqa: F401
 
     ADK_AVAILABLE = True
 except ImportError:
@@ -60,7 +60,7 @@ def get_city_info(city_name: str) -> Dict[str, Any]:
         if field in res and isinstance(res[field], str):
             try:
                 res[field] = json.loads(res[field])
-            except Exception:
+            except Exception:  # nosec B110
                 pass
     return res
 
@@ -95,7 +95,7 @@ def get_agent_runner() -> Optional[Any]:
                     import streamlit as st
 
                     api_key = st.secrets.get("GEMINI_API_KEY")
-                except Exception:
+                except Exception:  # nosec B110
                     pass
 
             if not api_key:

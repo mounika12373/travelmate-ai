@@ -137,7 +137,7 @@ pg.run()
 # Custom Sidebar Footer
 render_html(
     f"""
-    <div style='position: fixed; bottom: 10px; width: 100%; text-align: left; padding: 10px; font-size:0.8rem; color:gray;'>
+    <div style='position: fixed; bottom: 10px; width: 100%; text-align: left; padding-left: 10px; font-size:0.8rem; color:gray;'>
         {translate_ui("made_with_love")}
     </div>
 """,

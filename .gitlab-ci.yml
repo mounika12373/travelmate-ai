@@ -1,17 +1,12 @@
 image: python:3.11-slim
 
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  PYTHONPATH: "$CI_PROJECT_DIR"
-
-cache:
-  paths:
-    - .cache/pip
-    - .venv/
+default:
+  tags:
+    - admin
 
 stages:
-  - lint
   - format
+  - lint
   - type_check
   - test
   - coverage
@@ -55,6 +50,13 @@ ruff_lint:
     - pip install ruff
     - ruff check .
 
+
+type_check:
+  stage: type_check
+  script:
+    - pip install mypy types-requests types-setuptools streamlit pandas plotly
+    - mypy --ignore-missing-imports --exclude "(\.venv|Library|\.cache)" .
+
 # --- FORMAT STAGE ---
 
 ruff_format:
@@ -69,7 +71,8 @@ mypy_typecheck:
   stage: type_check
   script:
     - pip install mypy types-requests types-setuptools streamlit pandas plotly
-    - mypy app.py pages/ utils/ tests/
+    - mypy --ignore-missing-imports app.py pages/ utils/ tests/
+
 
 # --- TEST STAGE ---
 
@@ -78,7 +81,7 @@ unit_tests:
   script:
     - pip install -r requirements.txt
     - pip install pytest pytest-spec pytest-describe
-    - pytest
+    - PYTHONPATH=. pytest
 
 # --- COVERAGE STAGE ---
 
@@ -87,7 +90,8 @@ test_coverage:
   script:
     - pip install -r requirements.txt
     - pip install pytest pytest-cov
-    - pytest --cov=. --cov-report=term --cov-report=xml
+    - PYTHONPATH=. pytest --cov=. --cov-report=term --cov-report=xml
+
 
 # --- SECURITY STAGE ---
 

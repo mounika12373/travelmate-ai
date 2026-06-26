@@ -42,7 +42,7 @@ with st.sidebar.form("create_collection_form"):
 all_saved = get_saved_trips(user_id)
 
 # Filter unique collection names (ignore Placeholder items in user view if we filter them out)
-collections = sorted(list(set([t["collection_name"] for t in all_saved])))
+collections = sorted(list({t["collection_name"] for t in all_saved}))
 if "My Saved Trips" not in collections:
     collections.insert(0, "My Saved Trips")
 

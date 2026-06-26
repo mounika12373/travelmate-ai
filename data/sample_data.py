@@ -3590,7 +3590,6 @@ def populate_database():
                 city["safety_recommendations"],
             ),
         )
-
     # Clean old weather history data
     cursor.execute("DELETE FROM weather_history;")
 
@@ -3728,6 +3727,7 @@ def generate_weather_for_city(city_name, country_name):
             "recommendation": rec
         })
     return records
+
 
 
 if __name__ == "__main__":

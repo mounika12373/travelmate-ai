@@ -3,7 +3,7 @@ from utils import auth_utils as auth
 
 def describe_auth_module():
     def it_hashes_and_verifies_passwords():
-        password = "mySecretPassword123"
+        password = "mySecretPassword123"  # nosec B105  # gitleaks:allow
         hashed = auth.hash_password(password)
 
         assert hashed != password

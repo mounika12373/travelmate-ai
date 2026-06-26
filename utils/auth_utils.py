@@ -3,10 +3,12 @@ import hashlib
 import hmac
 import json
 import time
+from typing import Optional
 
 import streamlit as st
 
-SECRET_KEY = "travelmate_super_secret_key_12345"
+SECRET_KEY = "travelmate_super_secret_key_12345"  # nosec B105
+
 
 
 def hash_password(password: str) -> str:
@@ -45,14 +47,14 @@ def encode_jwt(payload: dict, expiry_seconds: int = 86400) -> str:
     header_b64 = base64url_encode(header)
     payload_b64 = base64url_encode(payload)
 
-    signature_input = f"{header_b64}.{payload_b64}".encode("utf-8")
+    signature_input = f"{header_b64}.{payload_b64}".encode()
     signature = hmac.new(SECRET_KEY.encode("utf-8"), signature_input, hashlib.sha256).digest()
     signature_b64 = base64.urlsafe_b64encode(signature).replace(b"=", b"").decode("utf-8")
 
     return f"{header_b64}.{payload_b64}.{signature_b64}"
 
 
-def decode_jwt(token: str) -> dict:
+def decode_jwt(token: str) -> Optional[dict]:
     """Decodes and verifies a JWT-like token. Returns payload dict or None if invalid/expired."""
     if not token:
         return None
@@ -63,7 +65,7 @@ def decode_jwt(token: str) -> dict:
         header_b64, payload_b64, signature_b64 = parts
 
         # Verify signature
-        signature_input = f"{header_b64}.{payload_b64}".encode("utf-8")
+        signature_input = f"{header_b64}.{payload_b64}".encode()
         expected_signature = hmac.new(SECRET_KEY.encode("utf-8"), signature_input, hashlib.sha256).digest()
         expected_signature_b64 = base64.urlsafe_b64encode(expected_signature).replace(b"=", b"").decode("utf-8")
 

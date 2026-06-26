@@ -275,8 +275,6 @@ def get_weather_history(city_id):
     from utils.i18n import translate_weather_record
 
     return [translate_weather_record(dict(row)) for row in rows]
-
-
 # ==========================================
 # NEW USER AUTH & PROFILE PERSISTENCE METHODS
 # ==========================================

@@ -310,7 +310,7 @@ if st.session_state.get("user"):
         from utils.database import get_saved_trips, save_trip
 
         saved_trips = get_saved_trips(st.session_state.user["id"])
-        collections = list(set([t["collection_name"] for t in saved_trips]))
+        collections = list({t["collection_name"] for t in saved_trips})
         if "My Saved Trips" not in collections:
             collections.append("My Saved Trips")
 

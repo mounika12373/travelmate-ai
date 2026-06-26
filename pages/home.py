@@ -105,115 +105,90 @@ if search_input:
 # 2. Main Navigation Selectors
 st.subheader(translate_ui("destination_guide"))
 countries = get_all_countries()
+country_names = [c["country_name"] for c in countries]
+selected_c_index = 0
 
-if not countries:
-    st.warning(translate_ui("no_travel_data"))
-else:
-    # Selected country mapping
-    country_names = [c["country_name"] for c in countries]
+sel_col1, sel_col2 = st.columns(2)
 
-    # Get current selected index from session state
-    selected_c_index = 0
-    if st.session_state.selected_country_id:
-        for idx, c in enumerate(countries):
-            if c["id"] == st.session_state.selected_country_id:
-                selected_c_index = idx
-                break
+with sel_col1:
+    selected_country_name = st.selectbox(
+        translate_ui("select_country"),
+        country_names,
+        index=selected_c_index if selected_c_index < len(country_names) else 0,
+        key="country_select",
+    )
 
-    sel_col1, sel_col2 = st.columns(2)
+    selected_country = next(c for c in countries if c["country_name"] == selected_country_name)
+    st.session_state.selected_country_id = selected_country["id"]
 
-    with sel_col1:
-        selected_country_name = st.selectbox(
-            translate_ui("select_country"),
-            country_names,
-            index=selected_c_index if selected_c_index < len(country_names) else 0,
-            key="country_select",
+    st.markdown(
+        f"""
+**{translate_ui("capital_label")}:** {selected_country["capital"]}
+**{translate_ui("currency_label")}:** {selected_country["currency"]}
+**{translate_ui("language_label")}:** {selected_country["language"]}
+"""
+    )
+
+    if st.button(translate_ui("view_country_guide"), use_container_width=True, key="view_country_btn_direct"):
+        st.switch_page("pages/country_info.py")
+
+with sel_col2:
+    cities = get_cities_by_country(selected_country["id"])
+
+    if cities:
+        city_names = [ct["city_name"] for ct in cities]
+
+        selected_ct_index = 0
+        if st.session_state.selected_city_id:
+            for idx, ct in enumerate(cities):
+                if ct["id"] == st.session_state.selected_city_id:
+                    selected_ct_index = idx
+                    break
+
+        selected_city_name = st.selectbox(
+            translate_ui("select_city"),
+            city_names,
+            index=selected_ct_index if selected_ct_index < len(city_names) else 0,
+            key="city_select",
         )
-        # Find matching country object
-        selected_country = next(c for c in countries if c["country_name"] == selected_country_name)
-        st.session_state.selected_country_id = selected_country["id"]
 
-        # Display short summary
-        st.markdown(f"""
-        **{translate_ui("capital_label")}:** {selected_country["capital"]}  
-        **{translate_ui("currency_label")}:** {selected_country["currency"]}  
-        **{translate_ui("language_label")}:** {selected_country["language"]}  
-        """)
+        selected_city = next(ct for ct in cities if ct["city_name"] == selected_city_name)
+        st.session_state.selected_city_id = selected_city["id"]
+
+        st.markdown(
+            f"""
+**{translate_ui("description") if "description" in selected_city else "Description"}:**
+{selected_city["description"][:140]}...
+"""
+        )
+
         if st.session_state.get("user"):
             from utils.database import get_saved_trips, save_trip
 
             saved = get_saved_trips(st.session_state.user["id"], "destination")
-            is_saved = any(s["name"] == selected_country_name for s in saved)
+            is_saved = any(s["name"] == selected_city_name for s in saved)
             if is_saved:
                 st.caption("⭐️ Bookmarked")
             else:
-                if st.button("Bookmark Country", key="bk_sel_c", use_container_width=True):
+                if st.button("Bookmark City", key="bk_sel_ct", use_container_width=True):
                     save_trip(
                         st.session_state.user["id"],
                         "destination",
-                        selected_country_name,
+                        selected_city_name,
                         "My Saved Trips",
                         {
-                            "country_id": selected_country["id"],
-                            "description": f"Capital: {selected_country['capital']}, Currency: {selected_country['currency']}",
+                            "city_id": selected_city["id"],
+                            "country_id": selected_city["country_id"],
+                            "description": selected_city["description"],
                         },
                     )
-                    st.success(f"Bookmarked {selected_country_name}!")
+                    st.success(f"Bookmarked {selected_city_name}!")
                     st.rerun()
-        if st.button(translate_ui("view_country_guide"), use_container_width=True):
-            st.switch_page("pages/country_info.py")
 
-    with sel_col2:
-        cities = get_cities_by_country(selected_country["id"])
-        if cities:
-            city_names = [ct["city_name"] for ct in cities]
-
-            selected_ct_index = 0
-            if st.session_state.selected_city_id:
-                for idx, ct in enumerate(cities):
-                    if ct["id"] == st.session_state.selected_city_id:
-                        selected_ct_index = idx
-                        break
-
-            selected_city_name = st.selectbox(
-                translate_ui("select_city"),
-                city_names,
-                index=selected_ct_index if selected_ct_index < len(city_names) else 0,
-                key="city_select",
-            )
-            selected_city = next(ct for ct in cities if ct["city_name"] == selected_city_name)
-            st.session_state.selected_city_id = selected_city["id"]
-
-            st.markdown(f"""
-            **{translate_ui("description") if "description" in selected_city else "Description"}:**  
-            {selected_city["description"][:140]}...
-            """)
-            if st.session_state.get("user"):
-                from utils.database import get_saved_trips, save_trip
-
-                saved = get_saved_trips(st.session_state.user["id"], "destination")
-                is_saved = any(s["name"] == selected_city_name for s in saved)
-                if is_saved:
-                    st.caption("⭐️ Bookmarked")
-                else:
-                    if st.button("Bookmark City", key="bk_sel_ct", use_container_width=True):
-                        save_trip(
-                            st.session_state.user["id"],
-                            "destination",
-                            selected_city_name,
-                            "My Saved Trips",
-                            {
-                                "city_id": selected_city["id"],
-                                "country_id": selected_city["country_id"],
-                                "description": selected_city["description"],
-                            },
-                        )
-                        st.success(f"Bookmarked {selected_city_name}!")
-                        st.rerun()
-            if st.button(translate_ui("view_city_details"), use_container_width=True):
-                st.switch_page("pages/city_info.py")
-        else:
-            st.info(translate_ui("no_cities_warning"))
+        if st.button(translate_ui("view_city_details"), use_container_width=True, key="view_city_btn_direct"):
+            st.switch_page("pages/city_info.py")
+    else:
+        st.info(translate_ui("no_cities_warning"))
 
 st.divider()
 
@@ -229,13 +204,21 @@ with col_trend1:
         image_path="assets/tokyo_city.png",
         badges=["4.9 ⭐", translate_ui("most_popular")],
     )
+
     btn_label = translate_ui("explore_tokyo")
-    if st.button(btn_label, key="trend_tokyo", use_container_width=True):
+
+    if st.button(
+        btn_label,
+        key="trend_tokyo",
+        use_container_width=True,
+    ):
         tokyo_city = next(
-            (ct for c in get_cities_by_country(2) if ct["city_name"].lower() in ["tokyo", "टोक्यो", "టోక్యో"]), None
+            (ct for ct in get_cities_by_country(2) if ct["city_name"].lower() in ["tokyo", "टोक्यो", "టోక్యో"]),
+            None,
         )
+
         if tokyo_city:
-            st.session_state.selected_country_id = 2  # Japan ID is 2
+            st.session_state.selected_country_id = 2
             st.session_state.selected_city_id = tokyo_city["id"]
             st.switch_page("pages/city_info.py")
 
@@ -246,14 +229,21 @@ with col_trend2:
         image_path="assets/hyderabad_city.png",
         badges=["4.7 ⭐", translate_ui("cultural_choice")],
     )
+
     btn_label = translate_ui("explore_hyderabad")
-    if st.button(btn_label, key="trend_hyd", use_container_width=True):
+
+    if st.button(
+        btn_label,
+        key="trend_hyd",
+        use_container_width=True,
+    ):
         hyd_city = next(
             (ct for ct in get_cities_by_country(1) if ct["city_name"].lower() in ["hyderabad", "हैदराबाद", "హైదరాబాద్"]),
             None,
         )
+
         if hyd_city:
-            st.session_state.selected_country_id = 1  # India ID is 1
+            st.session_state.selected_country_id = 1
             st.session_state.selected_city_id = hyd_city["id"]
             st.switch_page("pages/city_info.py")
 
@@ -264,17 +254,30 @@ with col_trend3:
         image_path="assets/singapore_city.png",
         badges=["4.8 ⭐", translate_ui("safest_destination")],
     )
+
     btn_label = translate_ui("explore_singapore")
-    if st.button(btn_label, key="trend_sg", use_container_width=True):
+
+    if st.button(
+        btn_label,
+        key="trend_sg",
+        use_container_width=True,
+    ):
         sg_city = next(
             (
                 ct
-                for c in get_cities_by_country(3)
-                if ct["city_name"].lower() in ["singapore city", "downtown core", "डाउनटाउन कोर", "డౌన్‌టౌన్ కోర్"]
+                for ct in get_cities_by_country(3)
+                if ct["city_name"].lower()
+                in [
+                    "singapore city",
+                    "downtown core",
+                    "डाउनटाउन कोर",
+                    "డౌన్‌టౌన్ కోర్",
+                ]
             ),
             None,
         )
+
         if sg_city:
-            st.session_state.selected_country_id = 3  # Singapore ID is 3
+            st.session_state.selected_country_id = 3
             st.session_state.selected_city_id = sg_city["id"]
             st.switch_page("pages/city_info.py")

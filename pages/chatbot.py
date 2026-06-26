@@ -143,7 +143,6 @@ def generate_bot_response(user_query, active_country_id, active_city_id):
                 rules=target_country["rules"],
                 etiquette=target_country["etiquette"],
             )
-
         elif is_weather:
             try:
                 history = get_weather_history(target_city["id"])
@@ -199,7 +198,6 @@ def generate_bot_response(user_query, active_country_id, active_city_id):
 
         elif is_visa:
             return translate_ui("bot_visa_country").format(country=country_name, visa=target_country["visa_info"])
-
         elif is_weather:
             cities_in_c = get_cities_by_country(target_country["id"])
             if cities_in_c:
