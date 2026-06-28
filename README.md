@@ -8,7 +8,7 @@
 
 TravelMate AI is a comprehensive, Streamlit-based travel companion application designed to assist tourists in understanding countries and cities before visiting. The platform integrates emergency contact details, visa checklists, local laws, cultural dos and don'ts, recommended hotel stays, local cuisines, and personalized daily itinerary planners.
 
-It also integrates a context-aware **AI Travel Assistant**—a chatbot that queries a local SQLite database to provide instant answers to traveler questions.
+It also integrates a context-aware **AI Travel Assistant**—a chatbot that queries a local SQLite database to provide instant answers to traveler questions ON time
 
 ---
 
